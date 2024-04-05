@@ -120,7 +120,7 @@ By establishing a standard for motion telemetry in video games, developers can b
                   "max": 300,
                   "min": -20
                 },
-                "headlights": {
+                "headlight": {
                   "type": "boolean",
                   "value": 1
                 },
