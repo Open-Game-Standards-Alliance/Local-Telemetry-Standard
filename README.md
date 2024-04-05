@@ -47,6 +47,7 @@ By establishing a standard for motion telemetry in video games, developers can b
         "vehicle": {
             "acceleration": {
               "measurement": "m/s^2",
+              "type": "float",
               "x": {
                 "current": 2.0,
                 "max": 0,
@@ -65,6 +66,7 @@ By establishing a standard for motion telemetry in video games, developers can b
             },
             "position": {
               "measurement": "meters",
+              "type": "float",
               "x": {
                 "current": 123.45,
                 "max": 0,
@@ -83,6 +85,7 @@ By establishing a standard for motion telemetry in video games, developers can b
             },
             "rotation": {
               "measurement": "radians",
+              "type": "float",
               "x": {
                 "current": 0.0,
                 "max": 0,
@@ -101,6 +104,7 @@ By establishing a standard for motion telemetry in video games, developers can b
             },
             "velocity": {
               "measurement": "m/s",
+              "type": "float",
               "x": {
                 "current": 30.0,
                 "max": 0,
@@ -124,26 +128,70 @@ By establishing a standard for motion telemetry in video games, developers can b
                      {
                          "name": "front_left",
                          "type": "wheel, propeller, jet, track, sail, waterjet, leg",
-                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                         "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "atmosphere, asphalt, dirt, rumble strip, liquid"}
+                         "position": {
+                            "measurement": "metres", // distance from centre +/- meters
+                            "type": "float",
+                            "offset_x": 123.45,
+                            "offset_y": 67.89,
+                            "offset_z": 100.0
+                          },
+                         "suspension": {
+                            "type": "float",
+                            "stiffness": 0.4,
+                            "travel": 0.3,
+                            "terrain": "atmosphere, asphalt, dirt, rumble strip, liquid"
+                          }
                      },
                      {
                          "name": "front_right",
                          "type": "wheel, propeller, jet, track, sail, waterjet, leg",
-                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                         "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "gas, liquid, solid"}
+                         "position": {
+                            "measurement": "metres", // distance from centre +/- meters
+                            "type": "float",
+                            "offset_x": 123.45,
+                            "offset_y": 67.89,
+                            "offset_z": 100.0
+                          },
+                         "suspension": {
+                            "type": "float",
+                            "stiffness": 0.4,
+                            "travel": 0.3,
+                            "terrain": "gas, liquid, solid"
+                          }
                      },
                      {
                          "name": "rear_left",
                          "type": "wheel, propeller, jet, track, sail, waterjet, leg",
-                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                         "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
+                         "position": {
+                            "measurement": "metres", // distance from centre +/- meters
+                            "type": "float",
+                            "offset_x": 123.45,
+                            "offset_y": 67.89,
+                            "offset_z": 100.0
+                          },
+                         "suspension": {
+                            "type": "float",
+                            "stiffness": 0.4,
+                            "travel": 0.3,
+                            "terrain": "gas, liquid, solid"
+                          }
                      },
                      {
                          "name": "rear_right",
                          "type": "wheel, propeller, jet, track, sail, waterjet, leg",
-                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                         "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
+                         "position": {
+                            "measurement": "metres", // distance from centre +/- meters
+                            "type": "float",
+                            "offset_x": 123.45,
+                            "offset_y": 67.89,
+                            "offset_z": 100.0
+                          },
+                         "suspension": {
+                            "type": "float",
+                            "stiffness": 0.4,
+                            "travel": 0.3,
+                            "terrain": "gas, liquid, solid"
+                          }
                      }
                   ]
                 },
@@ -170,6 +218,7 @@ By establishing a standard for motion telemetry in video games, developers can b
                 },
                 "gear": {
                   "type": "integer",
+                  "measurement": "gear",
                   "current": 3,
                   "max": 6,
                   "min": -1
@@ -189,11 +238,11 @@ By establishing a standard for motion telemetry in video games, developers can b
                 },
                 "headlights": {
                   "type": "boolean",
-                  "value": 1
+                  "current": true
                 },
                 "wiper_front": {
                   "type": "boolean",
-                  "value": 1
+                  "current": true
                 },
                 "heading": {"x": 2.0, "y": 0.0, "z": 0.0}, // radians
                 "elevator": 0.2,
@@ -231,12 +280,22 @@ The `vehicle` object holds information about the player's vehicle.
 
 The `drive_system` object describes the propulsion and aerodynamics of the vehicle.
 
-  - `drive_points`: Information about each drive point, including type, position, suspension stiffness, travel, and terrain.
+- `drive_points`: Information about each drive point, including type, position, suspension stiffness, travel, and terrain. Declare as many as required.
 - `aerodynamics`: Aerodynamic properties of the vehicle, such as lift coefficient, drag coefficient, and yaw moment coefficient.
 
 #### Vehicle Feedback
 
-The `vehicle_feedback` object provides feedback data about the vehicle.
+The `vehicle_feedback` object provides feedback data about the vehicle. Declare as many subkeys as desired. This needs more refinement.
+
+```
+                "[feedbackitemname]": {
+                  "type": "boolean, float, integer, number, object, string", // < one of.. https://www.w3schools.com/js/js_datatypes.asp
+                  "measurement": "meters", // measurment scale, only required if numeric
+                  "current": 1000, // curent value
+                  "max": 5000, // maximum value, only required if numeric
+                  "min": -5000 // minimum value, only required if numeric
+                },
+```
 
 - `gear`: Current gear of the vehicle.
 - `gearMax`: Max gear of the vehicle.
