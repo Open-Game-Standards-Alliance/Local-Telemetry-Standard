@@ -231,9 +231,7 @@ The `vehicle` object holds information about the player's vehicle.
 
 The `drive_system` object describes the propulsion and aerodynamics of the vehicle.
 
-- `propulsion`: Details about the propulsion system, including type and drive points.
-  - `type`: Array of propulsion types the vehicle uses.
-  - `drive_points`: Information about each drive point, including position, suspension stiffness, travel, and terrain.
+  - `drive_points`: Information about each drive point, including type, position, suspension stiffness, travel, and terrain.
 - `aerodynamics`: Aerodynamic properties of the vehicle, such as lift coefficient, drag coefficient, and yaw moment coefficient.
 
 #### Vehicle Feedback
