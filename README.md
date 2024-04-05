@@ -31,7 +31,7 @@ By establishing a standard for motion telemetry in video games, developers can b
 ```json
 {
     "api_version": "1.0",
-    "recommended_sampling_rate": "120", // samples per second
+    "maximum_sampling_rate": "120", // maximum samples per minute motion software plugin can use
     "game_name": "Awesome Simulator",
     "timestamp": 1649125392,
     "environment": {
