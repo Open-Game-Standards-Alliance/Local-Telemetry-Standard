@@ -1,4 +1,4 @@
-# Open Motion Alliance API Proposal (Work in Progress)
+# Open Motion Alliance Telemetry Standard (Proposal - Work in Progress)
 
 Creating a standard for motion telemetry in video games involves establishing a set of guidelines or specifications that game developers can adhere to when implementing motion tracking and telemetry systems. Here's a proposal for such a standard:
 
