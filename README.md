@@ -1,10 +1,10 @@
-# Open Motion Alliance Telemetry Standard (Proposal - Work in Progress)
+# Open Motion Alliance API Proposal (Work in Progress)
 
 Creating a standard for motion telemetry in video games involves establishing a set of guidelines or specifications that game developers can adhere to when implementing motion tracking and telemetry systems. Here's a proposal for such a standard:
 
-1. **Data Format**: Define a standardized format for motion telemetry data. This format should be flexible enough to accommodate various types of motion data such as position, rotation, velocity, acceleration, and force.
+1. **Data Format**: JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate.
 
-2. **Units of Measurement**: Specify the units of measurement to be used for each type of motion data (e.g., meters for position, radians for rotation, meters per second for velocity).
+2. **Units of Measurement**: Should specify the units of measurement to be used for each type of motion data (e.g., meters for position, radians for rotation, meters per second for velocity).
 
 3. **Sampling Rate**: Establish a recommended sampling rate for capturing motion data. This should strike a balance between accuracy and performance, ensuring smooth motion without excessive computational overhead.
 
@@ -12,15 +12,13 @@ Creating a standard for motion telemetry in video games involves establishing a 
 
 5. **Calibration Procedures**: Define procedures for calibrating motion tracking devices to ensure accuracy and consistency across different hardware setups.
 
-6. **Data Transmission**: Specify protocols for transmitting motion telemetry data between hardware devices and game engines.
-
-   1. Propose UDP multicast so multiple apllicatiuons can inspect relevant data at the same time.
+6. **Data Transmission**: UDP multicast so multiple client applications can inspect streamed data at the same time.
 
 7. **Integration with Game Engines**: Provide guidelines for integrating motion telemetry data into popular game engines such as Unity or Unreal Engine. This may involve creating APIs or plugins to facilitate seamless integration.
 
 8. **Data Privacy and Security**: Address concerns related to the collection and transmission of motion telemetry data, including privacy issues and security vulnerabilities. Implement encryption and authentication mechanisms to protect sensitive data.
 
-9. **Error Handling**: Define how to handle errors and discrepancies in motion telemetry data, including methods for error detection, correction, and reporting.
+9. **Error Handling**: Always providing Min/Max values will allow for motion software to drop values outside of allowed range.
 
 10. **Documentation and Support**: Develop comprehensive documentation and support resources to assist developers in implementing the standard effectively. This could include tutorials, sample code, troubleshooting guides, and community forums.
 
@@ -33,6 +31,7 @@ By establishing a standard for motion telemetry in video games, developers can b
 ```json
 {
     "api_version": "1.0",
+    "recommended_sampling_rate": "120", // samples per second
     "game_name": "Awesome Simulator",
     "timestamp": 1649125392,
     "environment": {
@@ -46,35 +45,103 @@ By establishing a standard for motion telemetry in video games, developers can b
     "player": {
         "location": "place, airport code, track name",
         "vehicle": {
-            "acceleration": {"x": 2.0, "y": 0.0, "z": 0.0}, // m/s^2
-            "position": {"x": 123.45, "y": 67.89, "z": 100.0}, // meters
-            "rotation": {"x": 0.0, "y": 0.0, "z": 45.0}, // radians
+            "acceleration": {
+              "measurement": "m/s^2",
+              "x": {
+                "current": 2.0,
+                "max": 0,
+                "min": 255
+              },
+              "y":{
+                "current": 0.0,
+                "max": 0,
+                "min": 255
+              },
+              "z":{
+                "current": 0,
+                "max": 0,
+                "min": 255
+              }
+            },
+            "position": {
+              "measurement": "meters",
+              "x": {
+                "current": 123.45,
+                "max": 0,
+                "min": 255
+              },
+              "y":{
+                "current": 67.89,
+                "max": 0,
+                "min": 255
+              },
+              "z":{
+                "current": 100.0,
+                "max": 0,
+                "min": 255
+              }
+            },
+            "rotation": {
+              "measurement": "radians",
+              "x": {
+                "current": 0.0,
+                "max": 0,
+                "min": 255
+              },
+              "y":{
+                "current": 0.0,
+                "max": 360,
+                "min": 0
+              },
+              "z":{
+                "current": 45.0,
+                "max": 360,
+                "min": 0
+              }
+            },
+            "velocity": {
+              "measurement": "m/s",
+              "x": {
+                "current": 30.0,
+                "max": 0,
+                "min": 255
+              },
+              "y":{
+                "current": 0.0,
+                "max": 0,
+                "min": 255
+              },
+              "z":{
+                "current": 0,
+                "max": 0,
+                "min": 255
+              }
+            },
             "vehicle_type": "Aircraft, ATV, Boat, Helicopter, Hovercraft, Motorcycle, Spacecraft, Submersible, Tank, Terrestrial, Train, Truck",
             "vehicle_name": "Name of Vehicle",
-            "velocity": {"x": 30.0, "y": 0.0, "z": 0.0}, // m/s
             "drive_system": {
                  "drive_point": [
                      {
                          "name": "front_left",
-                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "type": "wheel, propeller, jet, track, sail, waterjet, leg",
                          "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
                          "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "atmosphere, asphalt, dirt, rumble strip, liquid"}
                      },
                      {
                          "name": "front_right",
-                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "type": "wheel, propeller, jet, track, sail, waterjet, leg",
                          "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
                          "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "gas, liquid, solid"}
                      },
                      {
                          "name": "rear_left",
-                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "type": "wheel, propeller, jet, track, sail, waterjet, leg",
                          "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
                          "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
                      },
                      {
                          "name": "rear_right",
-                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "type": "wheel, propeller, jet, track, sail, waterjet, leg",
                          "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
                          "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
                      }
@@ -120,7 +187,7 @@ By establishing a standard for motion telemetry in video games, developers can b
                   "max": 300,
                   "min": -20
                 },
-                "headlight": {
+                "headlights": {
                   "type": "boolean",
                   "value": 1
                 },
