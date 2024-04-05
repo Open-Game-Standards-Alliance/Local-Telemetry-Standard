@@ -298,9 +298,7 @@ The `vehicle_feedback` object provides feedback data about the vehicle. Declare 
 ```
 
 - `gear`: Current gear of the vehicle.
-- `gearMax`: Max gear of the vehicle.
 - `speed`: Current speed of the vehicle.
-- `speed_max`: Maximum speed the vehicle can achieve.
 - `heading`: Current heading direction of the vehicle.
 - `elevator`, `aileron`, `rudder`, `dive_plane`: Control inputs for adjusting the vehicle's movement.
 - `rpm`: Current and maximum RPM of the vehicle's engine.
