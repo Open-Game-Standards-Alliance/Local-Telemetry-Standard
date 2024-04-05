@@ -139,25 +139,7 @@ By establishing a standard for motion telemetry in video games, developers can b
                 }
             }
         }
-    },
-    "track": {
-        "position": {"x": 0.0, "y": 0.0, "z": 0.0}, // meters
-        "rotation": {"x": 0.0, "y": 0.0, "z": 0.0} // radians
-    },
-    "opponents": [
-        {
-            "vehicle_name": "Enemy Fighter 1",
-            "position": {"x": 100.0, "y": 67.0, "z": 90.0}, // meters
-            "rotation": {"x": 0.0, "y": 0.0, "z": -30.0}, // radians
-            "velocity": {"x": 28.0, "y": 0.0, "z": 0.0} // m/s
-        },
-        {
-            "vehicle_name": "Enemy Fighter 2",
-            "position": {"x": 110.0, "y": 68.0, "z": 95.0}, // meters
-            "rotation": {"x": 0.0, "y": 0.0, "z": -45.0}, // radians
-            "velocity": {"x": 25.0, "y": 0.0, "z": 0.0} // m/s
-        }
-    ]
+    }
 }
 ```
 
@@ -199,19 +181,3 @@ The `vehicle_feedback` object provides feedback data about the vehicle.
 - `engine`: Details about the engine, including throttle position, power output, fuel flow rate, and temperature.
 - `environment_pressure`: Current and maximum pressure experienced by the vehicle's environment.
 - `altitude`: Current altitude and maximum/minimum altitude the vehicle can reach.
-
-### Track
-
-The `track` object contains information about the race track.
-
-- `position`: Current position of the track in 3D space.
-- `rotation`: Current rotation of the track in 3D space.
-
-### Opponents
-
-The `opponents` array lists data about opponent vehicles in the race.
-
-- `vehicle_name`: Name of the opponent vehicle.
-- `position`: Current position of the opponent vehicle in 3D space.
-- `rotation`: Current rotation of the opponent vehicle in 3D space.
-- `velocity`: Current velocity of the opponent vehicle in x, y, and z directions.
