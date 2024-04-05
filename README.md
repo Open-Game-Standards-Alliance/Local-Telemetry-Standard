@@ -53,30 +53,32 @@ By establishing a standard for motion telemetry in video games, developers can b
             "vehicle_name": "Name of Vehicle",
             "velocity": {"x": 30.0, "y": 0.0, "z": 0.0}, // m/s
             "drive_system": {
-                "propulsion": {
-                    "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
-                    "drive_points": [
-                        {
-                            "name": "front_left",
-                            "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                            "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "atmosphere, asphalt, dirt, rumble strip, liquid"}
-                        },
-                        {
-                            "name": "front_right",
-                            "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                            "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "gas, liquid, solid"}
-                        },
-                        {
-                            "name": "rear_left",
-                            "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                            "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
-                        },
-                        {
-                            "name": "rear_right",
-                            "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
-                            "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
-                        }
-                    ]
+                 "drive_point": [
+                     {
+                         "name": "front_left",
+                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
+                         "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "atmosphere, asphalt, dirt, rumble strip, liquid"}
+                     },
+                     {
+                         "name": "front_right",
+                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
+                         "suspension": {"stiffness": 0.3, "travel": 0.2, "terrain": "gas, liquid, solid"}
+                     },
+                     {
+                         "name": "rear_left",
+                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
+                         "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
+                     },
+                     {
+                         "name": "rear_right",
+                         "type": ["wheel", "propeller", "jet", "track", "sail", "waterjet", "leg"],
+                         "position": {"offset_x": 123.45, "offset_y": 67.89, "offset_z": 100.0}, // distance from centre +/- meters
+                         "suspension": {"stiffness": 0.4, "travel": 0.3, "terrain": "gas, liquid, solid"}
+                     }
+                  ]
                 },
                 "aerodynamics": {
                     "lift_coefficient": 0.7,
