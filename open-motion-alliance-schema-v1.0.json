@@ -3,7 +3,7 @@
     "$id": "https://raw.githubusercontent.com/Open-Motion-Alliance/Standard/main/open-motion-alliance-schema-v1.0.json",
     "title": "Open Telemetry Standard",
     "version": "1.0",
-    "description": "A product in the catalog",
+    "description": "A schema to validate against the Open Motion Alliance standard",
     "type": "object",
     "required": [ "schema", "timestamp", "gameName", "maxSampleRate", "motionObject" ],
     "properties": {
