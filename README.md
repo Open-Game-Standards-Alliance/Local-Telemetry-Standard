@@ -30,7 +30,7 @@ By establishing a standard for motion telemetry in video games, developers can b
 
 ```json
 {
-    "schema": "https://example.com/open-telemetry-alliance_schema_v1.0.json",
+    "schema": "https://raw.githubusercontent.com/Open-Motion-Alliance/Standard/main/open-motion-alliance-schema-v1.0.json",
     "timestamp": 1649125392,
     "gameName": "Awesome Simulation Game",
     "maxSampleRate": "120",
