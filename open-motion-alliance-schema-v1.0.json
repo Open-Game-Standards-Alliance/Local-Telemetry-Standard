@@ -74,19 +74,19 @@
                 },
                 "positionX": {
                     "type": "number",
-                    "description": "",
+                    "description": "Position in the world in metres",
                     "minimum": "" ,
                     "maximum": ""
                 },
                 "positionY": {
                     "type": "number",
-                    "description": "",
+                    "description": "Position in the world in metres",
                     "minimum": "" ,
                     "maximum": ""
                 },
                 "positionZ": {
                     "type": "number",
-                    "description": "",
+                    "description": "Position in the world in metres",
                     "minimum": "" ,
                     "maximum": ""
                 },
