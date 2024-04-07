@@ -36,7 +36,7 @@ PS: Particurlarly looking for game developers with motion telemetry experience, 
 
 Creating a standard for motion telemetry in video games involves establishing a set of guidelines or specifications that game developers can adhere to when implementing motion tracking and telemetry systems. Here's a proposal for such a standard:
 
-1. **Data Format**: JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate. While JSON is probably the most popular format for exchanging data, JSON Schema is the vocabulary that enables JSON data consistency, validity, and interoperability at scale. Therefore the standard is defined usimg JSON Schema.
+1. **Data Format**: JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate. While JSON is probably the most popular format for exchanging data, JSON Schema is the vocabulary that enables JSON data consistency, validity, and interoperability at scale. Therefore the standard is [defined using JSON Schema](https://github.com/Open-Motion-Alliance/Standard/blob/main/open-motion-alliance-schema-v1.0.json).
 
 2. **Units of Measurement**: Should specify the units of measurement to be used for each type of motion data (e.g., meters for position, radians for rotation, meters per second for velocity).
 
@@ -61,6 +61,8 @@ Creating a standard for motion telemetry in video games involves establishing a 
 12. **Versioning and Updates**: Plan for future updates and revisions to the standard to accommodate advances in technology and address feedback from developers and users.
 
 By establishing a standard for motion telemetry in video games, developers can benefit from interoperability, improved compatibility, and reduced development time when implementing motion tracking features in their games. Additionally, players can enjoy a more consistent and immersive gaming experience across different platforms and hardware devices.
+
+## Example telemetry output
 
 ```json
 {
