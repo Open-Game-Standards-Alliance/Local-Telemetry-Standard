@@ -1,4 +1,38 @@
-# Open Motion Alliance Telemetry Standard (Proposal: Work in Progress)
+# Open Motion Alliance Telemetry Standard (Work in Progress)
+
+There is a gaping hole in tools to help game developers add motion simulator support to their games, primarily the lack of a standard for doing so.
+
+So I have set out to remedy the situation by doing the following:
+
+- Step 1: Define a draft standard schema for motion data that is agnostic of the vehicle type https://github.com/Open-Motion-Alliance/Standard
+- Step 2: Seek input from developers of games and motion software (current step)
+- Step 3: Refine and ratify standard
+- Step 4: Source developers to work on game engine plugins to output data in this schema
+- Step 5: Develop plugins for game engines and motion software
+- Step 6: Spread the tools to game developers and game consumers
+
+## Why the Need?
+
+Integrating motion data into games is often a daunting task due to incompatible formats and complex integration processes. The Open Telemetry Alliance Standard aims to eliminate these obstacles by providing a unified framework for motion data exchange.
+
+## Enabling Seamless Integration
+
+The aim is to provide free plugins for common Game engines facilitating effortless integration and unlocking new levels of realism.
+
+With these plugins, game developers will be able to seamlessly incorporate motion data output into their projects, focusing on creating immersive experiences without worrying about compatibility issues.
+
+## Empowering Motion Software
+
+With a standardized format for telemetry the work to create plugins in Motion software plugins will be greatly reduced, it would most  even be possible to create a meta-plugin that would work for any game supporting the standard
+
+## Join the Movement
+
+Join us in shaping the future of motion integration in gaming with the Open Telemetry Alliance Standard. Together, we can redefine the possibilities of immersive gameplay experiences. https://discord.gg/2CEdbKYKsn
+
+PS: Particurlarly looking for game developers with motion telemetry experience, be that developing games or plugins for motion tools.
+
+
+# Proposal (Work in Progress)
 
 Creating a standard for motion telemetry in video games involves establishing a set of guidelines or specifications that game developers can adhere to when implementing motion tracking and telemetry systems. Here's a proposal for such a standard:
 
