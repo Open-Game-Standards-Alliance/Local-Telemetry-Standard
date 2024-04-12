@@ -1,216 +1,68 @@
-# Open Motion Alliance Telemetry Standard (Work in Progress)
+# Open Game Standards Alliance: Local Telemetry Standard (LTS)
 
-There is a gaping hole in tools to help game developers add motion simulator support to their games, primarily the lack of a standard for doing so.
+The Local Telemetry Standard (LTS) provides a standardised method and format for exposing relevant telemetry data to hardware and software on the users local network.
 
-So I have set out to remedy the situation by doing the following:
+It defines a logical minimal set of required telemetry to meet the standard, while also allowing developers the flexibility to include additional telemetry data in a well documented structure and format.
 
-- Step 1: Define a draft standard schema for motion data that is agnostic of the vehicle type https://github.com/Open-Motion-Alliance/Standard
-- Step 2: Seek input from developers of games and motion software (current step)
-- Step 3: Refine and ratify standard
-- Step 4: Source developers to work on game engine plugins to output data in this schema
-- Step 5: Develop plugins for game engines and motion software
-- Step 6: Spread the tools to game developers and game consumers
+It defines the network protocols and provides tools to aid implementation in multiple game engines.
 
-## Why the Need?
+## Scope
 
-Integrating motion data into games is often a daunting task due to incompatible formats and complex integration processes. The Open Telemetry Alliance Standard aims to eliminate these obstacles by providing a unified framework for motion data exchange.
+The scope of the LTS encompasses the following key areas:
 
-## Enabling Seamless Integration
+### Telemetry Transmission
 
-The aim is to provide free plugins for common Game engines facilitating effortless integration and unlocking new levels of realism.
+The LTS defines common methodologies and protocols for transmitting a wide range of telemetry data to local software/hardware to provide expanded abilities for:
 
-With these plugins, game developers will be able to seamlessly incorporate motion data output into their projects, focusing on creating immersive experiences without worrying about compatibility issues.
+    - Motion Simulation
+    - Haptics and Feedback
+    - Performance logging, tracking and reporting tools
 
-## Empowering Motion Software
+### Data Formatting
 
-With a standardized format for telemetry the work to create plugins in Motion software plugins will be greatly reduced, it would most  even be possible to create a meta-plugin that would work for any game supporting the standard
+The LTS establishes standardized formats and schemas for organizing and structuring telemetry data, ensuring consistency and compatibility across different gaming platforms, devices, and software systems.
 
-## Join the Movement
+### Data Transmission
 
-Join us in shaping the future of motion integration in gaming with the Open Telemetry Alliance Standard. Together, we can redefine the possibilities of immersive gameplay experiences. https://discord.gg/2CEdbKYKsn
+The LTS specifies standardized communication protocols and APIs for transmitting telemetry data to devices and software on the users local network.
 
-PS: Particurlarly looking for game developers with motion telemetry experience, be that developing games or plugins for motion tools.
+## What OGTS Does Not Cover
 
+While the LTS aims to provide a comprehensive framework for local telemetry transmission in the gaming industry, it does not cover the following areas:
 
-# Proposal (Work in Progress)
+### Game Content
 
-Creating a standard for motion telemetry in video games involves establishing a set of guidelines or specifications that game developers can adhere to when implementing motion tracking and telemetry systems. Here's a proposal for such a standard:
+The LTS does not dictate or regulate the content, design, or gameplay features of individual games. It focuses solely on the formatting, and transmission of telemetry data for devices and software on the users local network.
 
-1. **Data Format**: JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate. While JSON is probably the most popular format for exchanging data, JSON Schema is the vocabulary that enables JSON data consistency, validity, and interoperability at scale. Therefore the standard is [defined using JSON Schema](https://github.com/Open-Motion-Alliance/Standard/blob/main/open-motion-alliance-schema-v1.0.json).
+### Hardware Specifications
 
-2. **Units of Measurement**: Should specify the units of measurement to be used for each type of motion data (e.g., meters for position, radians for rotation, meters per second for velocity).
+The LTS does not prescribe specific hardware requirements or standards for gaming devices or platforms. It is platform-agnostic and designed to be compatible with a wide range of hardware configurations and operating environments.
 
-3. **Sampling Rate**: Establish a recommended sampling rate for capturing motion data. This should strike a balance between accuracy and performance, ensuring smooth motion without excessive computational overhead.
+### Business Models
 
-4. **Device Compatibility**: Identify compatible motion tracking devices and technologies that adhere to the standard. This may include accelerometers, gyroscopes, motion capture systems, VR controllers, etc.
+The LTS does not dictate or influence the business models, pricing strategies, or monetization methods adopted by game developers, publishers, or platform providers. It focuses exclusively on technical standards and practices related to telemetry data management.
 
-5. **Calibration Procedures**: Define procedures for calibrating motion tracking devices to ensure accuracy and consistency across different hardware setups.
+## Requirements
 
-6. **Data Transmission**: UDP multicast so multiple client applications can inspect streamed data at the same time.
+- Data structure must be easily understandable
+- Protocol must support multiple clients without the need for opening additional ports or proxying
+- Must be implementable in both console and PC context
+- Must allow structured addition of extra telemetry datapoints
 
-7. **Integration with Game Engines**: Provide guidelines for integrating motion telemetry data into popular game engines such as Unity or Unreal Engine. This may involve creating APIs or plugins to facilitate seamless integration.
+## Constraints and limitations
 
-8. **Data Privacy and Security**: Address concerns related to the collection and transmission of motion telemetry data, including privacy issues and security vulnerabilities. Implement encryption and authentication mechanisms to protect sensitive data.
+- Must be network efficient
+- Must have low latency at all areas of implementation
+- Does not allow update of data within game (read-only) *TBC*
 
-9. **Error Handling**: Schema will define Min/Max values, data will contain timestamp. These allow for motion software plugins to drop late packets and values outside of allowed range.
+## Examples and Scenarios
 
-10. **Documentation and Support**: Develop comprehensive documentation and support resources to assist developers in implementing the standard effectively. This could include tutorials, sample code, troubleshooting guides, and community forums.
+1. User plays game on a console, uses PC with motion control software to control a motion simulator and haptics devices using telemetry from the console game.
 
-11. **Testing and Certification**: Output of implementations can be validated against the schema using tools linked at https://json-schema.org/implementations#validators
+2. User plays game on PC, has created a realistic physical cockpit matching that of game, uses telemetry data fed into software client that controls the devices on the physical cockpit.
 
-12. **Versioning and Updates**: Plan for future updates and revisions to the standard to accommodate advances in technology and address feedback from developers and users.
+3. User plays game on PC or Console, a software client is able to log performance metrics over multiple sessions and provides a user friendly interface showing user performance and progression over time.
 
-By establishing a standard for motion telemetry in video games, developers can benefit from interoperability, improved compatibility, and reduced development time when implementing motion tracking features in their games. Additionally, players can enjoy a more consistent and immersive gaming experience across different platforms and hardware devices.
+## Decision Points and Trade-offs
 
-## Example telemetry output
-
-```json
-{
-    "schema": "https://raw.githubusercontent.com/Open-Motion-Alliance/Standard/main/open-motion-alliance-schema-v1.0.json",
-    "timestamp": 1649125392,
-    "gameName": "Awesome Simulation Game",
-    "maxSampleRate": "120",
-    "motionObject": {
-        "objectLocation": "track name",
-        "objectName": "Name of Vehicle",
-        "objectType": "aircraft, atv, boat, helicopter, hovercraft, motorcycle, spacecraft, submersible, tank, terrestrial, train, truck",
-        "accelerationX": 2.0,
-        "accelerationY": 0.0,
-        "accelerationZ": 0.0,
-        "positionX": 0.0,
-        "positionY": 0.0,
-        "positionZ": 0.0,
-        "rotationX": 0.0,
-        "rotationY": 0.0,
-        "rotationZ": 0.0,
-        "velocityX": 0.0,
-        "velocityY": 0.0,
-        "velocityZ": 0.0,
-        "drivePoints": [
-            {
-                "name": "front_left",
-                "type": "wheel",
-                "currentTerrain": "asphalt",
-                "cogOffsetX": 123.45,
-                "cogOffsetY": 67.89,
-                "cogOffsetZ": 100.0,
-                "travelX": [0.25, -0.25, 0.0],
-                "travelY": [0.25, -0.25, 0.0],
-                "travelZ": [0.25, -0.25, 20.0],
-            }
-        ],
-        "aerodynamics": {
-            "lift_coefficient": 0.7,
-            "drag_coefficient": 0.25,
-            "yaw_moment_coefficient": 0.1
-        },
-        "feedbackItem": [
-            {
-              "name": "altitude",
-              "type": "integer",
-              "unit": "meters",
-              "current": 1000,
-              "max": 5000,
-              "min": -5000
-            },
-            {
-              "name": "environment_pressure",
-              "type": "integer",
-              "unit": "bar",
-              "current": 100,
-              "max": 200,
-              "min": -200
-            },
-            {
-              "name": "gear",
-              "type": "integer",
-              "measurement": "gear",
-              "current": 3,
-              "max": 6,
-              "min": -1
-            },
-            {
-              "name": "rpm",
-              "type": "integer",
-              "unit": "rpm",
-              "max": 8000,
-              "min": 0
-            },
-            {
-              "name": "speed",
-              "type": "integer",
-              "unit": "m/s",
-              "current": 50,
-              "max": 300,
-              "min": -20
-            },
-            {
-              "name": "headlights",
-              "type": "boolean",
-              "current": true
-            },
-            {
-              "name": "wiper_front",
-              "type": "boolean",
-              "current": true
-            },
-            {
-              "name": "heading",
-              "current": {"x": 2.0, "y": 0.0, "z": 0.0}, // radians
-            },
-            "elevator": 0.2,
-            "aileron": 0.1,
-            "rudder": 0.05,
-            "dive_plane": 0.3,
-            "engine": {
-              "throttle_position": 50, // percentage
-              "power_output": 200,
-              "fuel_flow_rate": 1500,
-              "temperature": 150
-            }
-        ]
-    },
-    "environment": {
-        "density": 0.5,
-        "temperature": -20,
-        "temperature_metric": "celcius",
-        "pressure": 50,
-        "pressure_metric": "bar",
-        "gravity": 1.6
-    },
-}
-```
-
-- `schema`: URI of schema version used for this data
-- `timestamp`: Current game timestamp, for motion software plugin to know order of packets and what to ignore
-- `gameName`: Name of game that is outputting this data
-- `maxSampleRate`: Maximum samples per minute motion software plugin can poll at
-
-#### Motion Object
-
-The `motionObject` array holds information about the game object that is defining simulator movement.
-
-- `objectName`: Name of the object, should be unique per game to allow for motion profile tweaking per object
-- `objectLocation`: Location of the object. eg. place, airport code, track nam
-- `objectType`: Type of the vehicle (e.g., Aircraft, ATV, Boat, etc.).
-- `accelerationX`: Current acceleration in x direction.
-- `accelerationX`: Current acceleration in y direction.
-- `accelerationX`: Current acceleration in z direction.
-- `positionX`: Current position of the vehicle in 3D space.
-- `positionY`: Current position of the vehicle in 3D space.
-- `positionZ`: Current position of the vehicle in 3D space.
-- `rotationX`: Current rotation of the vehicle in 3D space.
-- `rotationY`: Current rotation of the vehicle in 3D space.
-- `rotationZ`: Current rotation of the vehicle in 3D space.
-- `velocityX`: Current velocity of the vehicle in 3D space.
-- `velocityY`: Current velocity of the vehicle in 3D space.
-- `velocityZ`: Current velocity of the vehicle in 3D space.
-- `aerodynamics`: Object containing aerodynamic properties of the vehicle, such as lift coefficient, drag coefficient, and yaw moment coefficient.
-
-#### Drive Points
-
-The `drivePoints` array provides information about each drive point (propulsion object), including name, type, currentTerrain, centre of gravity offsets, travel distance and stiffness. Declare as many as required.
-
-#### Feedback Items
-
-The `feedbackItems` array provides feedback data about the vehicle. This can be used for things like altitude, speedometer, gear, etc. Declare as many array objects as desired. This needs more refinement.
+With the need to support console devices any implementation method that only works with telemetry client software, or hardware directly running or connected to the device executing the game will not be entertained.
