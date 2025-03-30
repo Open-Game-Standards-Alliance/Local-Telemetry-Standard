@@ -66,3 +66,11 @@ The LTS does not dictate or influence the business models, pricing strategies, o
 ## Decision Points and Trade-offs
 
 With the need to support console devices any implementation method that only works with telemetry client software, or hardware directly running or connected to the device executing the game will not be entertained.
+
+## Implementation
+
+### Data format
+
+We propose using Cap'n Proto as the data format. Cap’n Proto is a zero-copy, binary serialization format optimized for speed and efficiency, making it an excellent choice for sending motion telemetry data over UDP. It avoids encoding/decoding overhead by using a memory-aligned layout, and it supports optional fields and nested structures efficiently.
+
+[Implementation details for Cap'n Proto data transport](implementation-capnproto.md).
