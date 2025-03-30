@@ -3,9 +3,8 @@
 # Root struct representing the full telemetry packet
 struct MotionTelemetry {
   gameName       @0 :Text;           # Name of the game
-  maxSampleRate  @1 :Int32;          # Maximum sample rate in Hz
-  timestamp      @2 :Int64;          # Unix timestamp (nanoseconds for precision)
-  motionObject   @3 :MotionObject;   # Core motion data
+  timestamp      @1 :Float64;        # Seconds since session start (double precision)
+  motionObject   @2 :MotionObject;   # Core motion data
 }
 
 # Represents the motionObject structure
@@ -14,34 +13,30 @@ struct MotionObject {
   objectName     @1 :Text;           # Name of the object
   objectType     @2 :Text;           # Type of the object (e.g., "vehicle")
 
-  # Acceleration (m/s²)
-  accelerationX  @3 :Float32;
-  accelerationY  @4 :Float32;
-  accelerationZ  @5 :Float32;
+  # Position in world space (meters, left-handed, Z-forward)
+  positionX      @3 :Float32;
+  positionY      @4 :Float32;
+  positionZ      @5 :Float32;
 
-  # Position (meters)
-  positionX      @6 :Float32;
-  positionY      @7 :Float32;
-  positionZ      @8 :Float32;
-
-  # Rotation (radians, assumed Euler angles)
-  rotationX      @9 :Float32;
-  rotationY      @10 :Float32;
-  rotationZ      @11 :Float32;
-
-  # Velocity (m/s)
-  velocityX      @12 :Float32;
-  velocityY      @13 :Float32;
-  velocityZ      @14 :Float32;
+  # Orientation in world space (left-handed, Z-forward)
+  forward        @6 :Vector3;        # Forward vector (Z-forward)
+  up             @7 :Vector3;        # Up vector (Y-up)
 
   # Array of drive points
-  drivePoints    @15 :List(DrivePoint);
+  drivePoints    @8 :List(DrivePoint);
 
   # Aerodynamics data
-  aerodynamics   @16 :Aerodynamics;
+  aerodynamics   @9 :Aerodynamics;
 
   # Feedback items (array of key-value pairs)
-  feedbackItem   @17 :List(FeedbackItem);
+  feedbackItem   @10 :List(FeedbackItem);
+}
+
+# Represents a 3D vector
+struct Vector3 {
+  x @0 :Float32;
+  y @1 :Float32;
+  z @2 :Float32;
 }
 
 # Represents a single drive point

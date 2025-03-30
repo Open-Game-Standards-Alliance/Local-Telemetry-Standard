@@ -1,4 +1,3 @@
-
 # Aeron Implementation
 
 To integrate Aeron with the Cap’n Proto example for sending motion telemetry data, we’ll combine Aeron’s high-performance messaging with Cap’n Proto’s efficient serialization. Aeron will handle the transport (over UDP), while Cap’n Proto defines the data structure. Below, I’ll outline a detailed implementation plan in C++, assuming a sender (game) and receiver (motion software) setup. This plan includes setup, code examples, and considerations for your use case.
@@ -7,12 +6,12 @@ To integrate Aeron with the Cap’n Proto example for sending motion telemetry d
 
 ### Overview
 
-- **Cap’n Proto**: Serializes the `MotionTelemetry` struct into a compact, zero-copy binary format (from the `.capnp` schema I provided).
+- **Cap’n Proto**: Serializes the `MotionTelemetry` struct into a compact, zero-copy binary format (from the `.capnp` schema defined in `implementation-capnproto.md`).
 - **Aeron**: Publishes this binary data over UDP to one or more subscribers, ensuring low latency, ordering, and optional reliability.
 - **Flow**:
   1. Game serializes telemetry data into a Cap’n Proto message.
   2. Aeron sends it via a publication channel.
-  3. Motion software subscribes and receives the data, deserializing it with Cap’n Proto.
+  3. Motion software subscribes and receives the data, deserializing it with Cap’n Proto. The library calculates derived values like velocity and acceleration.
 
 ---
 
@@ -93,16 +92,21 @@ public:
         MotionTelemetry::Builder telemetry = message.initRoot<MotionTelemetry>();
 
         telemetry.setGameName("RacingSim");
-        telemetry.setMaxSampleRate(60);
-        telemetry.setTimestamp(std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count());
+        telemetry.setTimestamp(1.234); // Seconds since session start
 
         MotionObject::Builder obj = telemetry.initMotionObject();
         obj.setObjectName("player_car");
         obj.setPositionX(1.5);
         obj.setPositionY(2.0);
         obj.setPositionZ(0.0);
-        // ... set other fields ...
+        auto forward = obj.initForward();
+        forward.setX(0.0);
+        forward.setY(0.0);
+        forward.setZ(1.0); // Z-forward
+        auto up = obj.initUp();
+        up.setX(0.0);
+        up.setY(1.0); // Y-up
+        up.setZ(0.0);
 
         auto drivePoints = obj.initDrivePoints(1);
         drivePoints[0].setName("wheel_fl");
@@ -200,9 +204,13 @@ private:
         MotionTelemetry::Reader telemetry = message.getRoot<MotionTelemetry>();
 
         // Use the data
-        printf("Game: %s, Timestamp: %ld\n", telemetry.getGameName().cStr(), telemetry.getTimestamp());
+        printf("Game: %s, Timestamp: %f\n", telemetry.getGameName().cStr(), telemetry.getTimestamp());
         MotionObject::Reader obj = telemetry.getMotionObject();
         printf("Position: (%f, %f, %f)\n", obj.getPositionX(), obj.getPositionY(), obj.getPositionZ());
+        auto forward = obj.getForward();
+        printf("Forward: (%f, %f, %f)\n", forward.getX(), forward.getY(), forward.getZ());
+        auto up = obj.getUp();
+        printf("Up: (%f, %f, %f)\n", up.getX(), up.getY(), up.getZ());
         if (obj.getDrivePoints().size() > 0) {
             printf("Wheel RPM: %f\n", obj.getDrivePoints()[0].getRpm());
         }
@@ -251,7 +259,7 @@ int main() {
    - All subscribers use the same URI.
 
 4. **Size**:
-   - A minimal `MotionTelemetry` packet (timestamp + 12 floats) is ~64 bytes with Cap’n Proto, plus Aeron’s small header (~32 bytes). Total < 100 bytes, well under UDP MTU.
+   - A minimal `MotionTelemetry` packet (timestamp + position + orientation) is ~68 bytes with Cap’n Proto, plus Aeron’s small header (~32 bytes). Total < 100 bytes, well under UDP MTU.
 
 5. **Error Handling**:
    - Check Aeron connection status and Cap’n Proto message validity (e.g., `message.getRoot()` throws on corruption).
@@ -283,14 +291,14 @@ auto driver = aeron::MediaDriver::launchEmbedded(driverContext);
 
 ## Enhanced Aeron Implementation with Transport Abstraction
 
-This section describes an enhanced implementation of the Local Telemetry Standard using Aeron as the transport layer, integrated with Cap’n Proto for serialization. The implementation abstracts the transport layer behind a high-level C API, uses a callback mechanism for receiving telemetry data, and supports extensibility for other transports (e.g., raw UDP). This implementation improves on the polling approach in the previous example by using a callback API for asynchronous data processing.
+This section describes an enhanced implementation of the Local Telemetry Standard using Aeron as the transport layer, integrated with Cap’n Proto for serialization. The implementation abstracts the transport layer behind a high-level C API, uses a callback mechanism for receiving telemetry data, and supports extensibility for other transports (e.g., raw UDP). This implementation improves on the polling approach in the previous example by using a callback API for asynchronous data processing. The library calculates derived values like velocity and acceleration on the receiver side, minimizing the math required by both the game and motion software.
 
 ### Overview
 - **Aeron**: Used for low-latency, reliable transport over UDP, with support for ordering and multicast.
 - **Cap’n Proto**: Handles serialization of the telemetry data (see `implementation-capnproto.md` for the schema).
 - **Transport Abstraction**: A `Transport` base class allows swapping transports without changing the high-level API.
 - **Callback API**: Receivers register a callback to process incoming telemetry data asynchronously.
-- **High-Level C API**: Developers interact with simple functions like `motion_telemetry_set_position_x`, hiding transport and serialization details.
+- **High-Level C API**: Developers interact with simple functions like `motion_telemetry_set_position_x`, hiding transport and serialization details. The library provides access to both raw data (e.g., position, orientation) and derived data (e.g., velocity, acceleration).
 
 ### Transport Abstraction
 The transport layer is abstracted via a C++ base class `Transport`, with `AeronTransport` as a derived implementation:
@@ -300,11 +308,16 @@ class Transport {
 public:
     virtual ~Transport() = default;
     virtual void setGameName(const std::string& name) = 0;
-    virtual void setMaxSampleRate(int32_t rate) = 0;
-    virtual void setTimestamp(int64_t timestamp) = 0;
+    virtual void setTimestamp(double timestamp) = 0;
     virtual void setPositionX(float x) = 0;
     virtual void setPositionY(float y) = 0;
     virtual void setPositionZ(float z) = 0;
+    virtual void setForwardX(float x) = 0;
+    virtual void setForwardY(float y) = 0;
+    virtual void setForwardZ(float z) = 0;
+    virtual void setUpX(float x) = 0;
+    virtual void setUpY(float y) = 0;
+    virtual void setUpZ(float z) = 0;
     virtual void send() = 0;
     virtual void registerCallback(TelemetryCallback callback) = 0;
     virtual void startReceiving() = 0;
@@ -323,25 +336,57 @@ typedef void (*TelemetryCallback)(void* userData);
 MotionTelemetryHandle* motion_telemetry_create_sender(const char* transportType, const char* channel, int streamId);
 MotionTelemetryHandle* motion_telemetry_create_receiver(const char* transportType, const char* channel, int streamId);
 void motion_telemetry_set_game_name(MotionTelemetryHandle* handle, const char* name);
+void motion_telemetry_set_timestamp(MotionTelemetryHandle* handle, double timestamp);
 void motion_telemetry_set_position_x(MotionTelemetryHandle* handle, float x);
 void motion_telemetry_set_position_y(MotionTelemetryHandle* handle, float y);
 void motion_telemetry_set_position_z(MotionTelemetryHandle* handle, float z);
+void motion_telemetry_set_forward_x(MotionTelemetryHandle* handle, float x);
+void motion_telemetry_set_forward_y(MotionTelemetryHandle* handle, float y);
+void motion_telemetry_set_forward_z(MotionTelemetryHandle* handle, float z);
+void motion_telemetry_set_up_x(MotionTelemetryHandle* handle, float x);
+void motion_telemetry_set_up_y(MotionTelemetryHandle* handle, float y);
+void motion_telemetry_set_up_z(MotionTelemetryHandle* handle, float z);
 void motion_telemetry_send(MotionTelemetryHandle* handle);
 void motion_telemetry_register_callback(MotionTelemetryHandle* handle, TelemetryCallback callback, void* userData);
 void motion_telemetry_start_receiving(MotionTelemetryHandle* handle);
 const char* motion_telemetry_get_game_name(MotionTelemetryHandle* handle);
+double motion_telemetry_get_timestamp(MotionTelemetryHandle* handle);
 float motion_telemetry_get_position_x(MotionTelemetryHandle* handle);
 float motion_telemetry_get_position_y(MotionTelemetryHandle* handle);
 float motion_telemetry_get_position_z(MotionTelemetryHandle* handle);
+float motion_telemetry_get_forward_x(MotionTelemetryHandle* handle);
+float motion_telemetry_get_forward_y(MotionTelemetryHandle* handle);
+float motion_telemetry_get_forward_z(MotionTelemetryHandle* handle);
+float motion_telemetry_get_up_x(MotionTelemetryHandle* handle);
+float motion_telemetry_get_up_y(MotionTelemetryHandle* handle);
+float motion_telemetry_get_up_z(MotionTelemetryHandle* handle);
+float motion_telemetry_get_velocity_x(MotionTelemetryHandle* handle);
+float motion_telemetry_get_velocity_y(MotionTelemetryHandle* handle);
+float motion_telemetry_get_velocity_z(MotionTelemetryHandle* handle);
+float motion_telemetry_get_acceleration_x(MotionTelemetryHandle* handle);
+float motion_telemetry_get_acceleration_y(MotionTelemetryHandle* handle);
+float motion_telemetry_get_acceleration_z(MotionTelemetryHandle* handle);
 void motion_telemetry_destroy(MotionTelemetryHandle* handle);
 ```
 
-The full API includes setters for all fields (e.g., `motion_telemetry_set_rotation_x`, `motion_telemetry_set_velocity_x`), following the same pattern.
+The full API includes setters and getters for all fields (e.g., `motion_telemetry_set_drive_point_rpm`, `motion_telemetry_get_aerodynamics_lift`), following the same pattern.
 
 ### Sender Example
 The game sends telemetry data continuously at 60 Hz until the user stops it:
 
 ```c
+#include <sys/time.h>
+
+double getTimeSinceStart() {
+    static struct timeval start = {0, 0};
+    if (start.tv_sec == 0) {
+        gettimeofday(&start, NULL);
+    }
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return (now.tv_sec - start.tv_sec) + (now.tv_usec - start.tv_usec) / 1000000.0;
+}
+
 MotionTelemetryHandle* sender = motion_telemetry_create_sender("aeron", "aeron:udp?endpoint=localhost:40123", 1001);
 if (!sender) {
     printf("Failed to create sender\n");
@@ -361,9 +406,16 @@ while (1) {
     }
 
     motion_telemetry_set_game_name(sender, "RacingSim");
+    motion_telemetry_set_timestamp(sender, getTimeSinceStart());
     motion_telemetry_set_position_x(sender, 1.5 + i * 0.1);
     motion_telemetry_set_position_y(sender, 2.0);
     motion_telemetry_set_position_z(sender, 0.0);
+    motion_telemetry_set_forward_x(sender, 0.0);
+    motion_telemetry_set_forward_y(sender, 0.0);
+    motion_telemetry_set_forward_z(sender, 1.0); // Z-forward
+    motion_telemetry_set_up_x(sender, 0.0);
+    motion_telemetry_set_up_y(sender, 1.0); // Y-up
+    motion_telemetry_set_up_z(sender, 0.0);
     motion_telemetry_send(sender);
     usleep(16667); // ~60 Hz
     i++;
@@ -372,16 +424,33 @@ motion_telemetry_destroy(sender);
 ```
 
 ### Receiver Example
-The motion software registers a callback to process incoming data:
+The motion software registers a callback to be notified when new telemetry data arrives, then pulls the data (including derived velocity and acceleration) using the C API:
 
 ```c
 void onTelemetry(void* userData) {
     MotionTelemetryHandle* handle = (MotionTelemetryHandle*)userData;
     const char* gameName = motion_telemetry_get_game_name(handle);
+    double timestamp = motion_telemetry_get_timestamp(handle);
     float positionX = motion_telemetry_get_position_x(handle);
     float positionY = motion_telemetry_get_position_y(handle);
     float positionZ = motion_telemetry_get_position_z(handle);
-    printf("Received - Game: %s, Position: (%f, %f, %f)\n", gameName, positionX, positionY, positionZ);
+    float forwardX = motion_telemetry_get_forward_x(handle);
+    float forwardY = motion_telemetry_get_forward_y(handle);
+    float forwardZ = motion_telemetry_get_forward_z(handle);
+    float upX = motion_telemetry_get_up_x(handle);
+    float upY = motion_telemetry_get_up_y(handle);
+    float upZ = motion_telemetry_get_up_z(handle);
+    float velocityX = motion_telemetry_get_velocity_x(handle);
+    float velocityY = motion_telemetry_get_velocity_y(handle);
+    float velocityZ = motion_telemetry_get_velocity_z(handle);
+    float accelerationX = motion_telemetry_get_acceleration_x(handle);
+    float accelerationY = motion_telemetry_get_acceleration_y(handle);
+    float accelerationZ = motion_telemetry_get_acceleration_z(handle);
+    printf("Received - Game: %s, Timestamp: %f\n", gameName, timestamp);
+    printf("Position: (%f, %f, %f)\n", positionX, positionY, positionZ);
+    printf("Forward: (%f, %f, %f), Up: (%f, %f, %f)\n", forwardX, forwardY, forwardZ, upX, upY, upZ);
+    printf("Velocity: (%f, %f, %f)\n", velocityX, velocityY, velocityZ);
+    printf("Acceleration: (%f, %f, %f)\n", accelerationX, accelerationY, accelerationZ);
 }
 
 MotionTelemetryHandle* receiver = motion_telemetry_create_receiver("aeron", "aeron:udp?endpoint=localhost:40123", 1001);
@@ -402,6 +471,7 @@ Use the channel and stream ID configuration defined in the "Define Aeron Channel
 - **Low Latency**: Aeron ensures sub-millisecond delivery, ideal for real-time motion telemetry.
 - **Abstraction**: Developers use a simple C API without touching Aeron directly.
 - **Extensibility**: Add new transports (e.g., raw UDP) by implementing the `Transport` interface.
-- **Asynchronous Processing**: The callback API simplifies real-time telemetry processing by handling data as it arrives.
+- **Asynchronous Processing**: The callback API notifies the receiver of new data, allowing on-demand access to the full telemetry frame via getter functions.
+- **Simplified Integration**: The library calculates velocity and acceleration, reducing the math required by both the game and motion software.
 
 See `implementation-capnproto.md` for details on the serialization format.
