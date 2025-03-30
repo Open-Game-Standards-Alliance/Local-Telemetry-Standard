@@ -1,259 +1,120 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/Open-Motion-Alliance/Standard/main/open-motion-alliance-schema-v1.0.json",
-    "title": "Open Telemetry Standard",
-    "version": "1.0",
-    "description": "A schema to validate against the Open Motion Alliance standard",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/Open-Game-Standards-Alliance/Local-Telemetry-Standard/refs/heads/main/open-motion-alliance-schema-v1.0.json",
+    "title": "Open Motion Telemetry Standard",
+    "description": "A schema for real-time motion telemetry data exchange between games and motion platforms, using a left-handed coordinate system with Z-forward and Y-up in world space.",
     "type": "object",
-    "required": [ "schema", "timestamp", "gameName", "maxSampleRate", "motionObject" ],
+    "required": ["gameName", "timestamp", "motionObject"],
     "properties": {
-        "schema": {
-            "description": "URI of schema version used for this data",
-            "type": "string"
-        },
-        "timestamp": {
-            "description": "Current timestamp of the game session, for motion software plugin to know order of packets",
+      "gameName": {
+        "type": "string",
+        "description": "Name of the game sending the telemetry data."
+      },
+      "timestamp": {
+        "type": "number",
+        "description": "Time in seconds since the start of the session (double precision float)."
+      },
+      "motionObject": {
+        "type": "object",
+        "required": ["objectLocation", "objectName", "objectType", "positionX", "positionY", "positionZ", "forward", "up"],
+        "properties": {
+          "objectLocation": {
             "type": "string",
-            "format": "date-time"
-        },
-        "gameName": {
-            "description": "Name of game that is outputting this data",
-            "$ref": "#/$defs/name"
-        },
-        "maxSampleRate": {
-            "description": "Maximum samples per minute motion software plugin can poll at",
-            "type": "integer",
-            "units": "samples per minute"
-        },
-        "motionObject": {
-            "description": "Object that defines movement of simulator",
+            "description": "Location of the object (e.g., 'car')."
+          },
+          "objectName": {
+            "type": "string",
+            "description": "Name of the object (e.g., 'player_car')."
+          },
+          "objectType": {
+            "type": "string",
+            "description": "Type of the object (e.g., 'vehicle')."
+          },
+          "positionX": {
+            "type": "number",
+            "description": "X-coordinate of the object's position in world space (meters, left-handed, Z-forward)."
+          },
+          "positionY": {
+            "type": "number",
+            "description": "Y-coordinate of the object's position in world space (meters, left-handed, Z-forward)."
+          },
+          "positionZ": {
+            "type": "number",
+            "description": "Z-coordinate of the object's position in world space (meters, left-handed, Z-forward)."
+          },
+          "forward": {
+            "type": "object",
+            "required": ["x", "y", "z"],
+            "properties": {
+              "x": { "type": "number", "description": "X-component of the forward vector (unit vector, Z-forward in world space)." },
+              "y": { "type": "number", "description": "Y-component of the forward vector (unit vector, Z-forward in world space)." },
+              "z": { "type": "number", "description": "Z-component of the forward vector (unit vector, Z-forward in world space)." }
+            },
+            "description": "Forward direction vector in world space (left-handed, Z-forward)."
+          },
+          "up": {
+            "type": "object",
+            "required": ["x", "y", "z"],
+            "properties": {
+              "x": { "type": "number", "description": "X-component of the up vector (unit vector, Y-up in world space)." },
+              "y": { "type": "number", "description": "Y-component of the up vector (unit vector, Y-up in world space)." },
+              "z": { "type": "number", "description": "Z-component of the up vector (unit vector, Y-up in world space)." }
+            },
+            "description": "Up direction vector in world space (left-handed, Y-up)."
+          },
+          "drivePoints": {
             "type": "array",
-            "items": { "$ref": "#/$defs/motionObject" }
-        }
+            "items": {
+              "type": "object",
+              "required": ["name", "type", "cogOffsetX", "cogOffsetY", "cogOffsetZ", "rpm", "torque", "brakePressure"],
+              "properties": {
+                "name": { "type": "string", "description": "Name of the drive point (e.g., 'wheel_front_left')." },
+                "type": { "type": "string", "description": "Type of the drive point." },
+                "cogOffsetX": { "type": "number", "description": "X-offset of the center of gravity (meters)." },
+                "cogOffsetY": { "type": "number", "description": "Y-offset of the center of gravity (meters)." },
+                "cogOffsetZ": { "type": "number", "description": "Z-offset of the center of gravity (meters)." },
+                "rpm": { "type": "number", "description": "Revolutions per minute." },
+                "torque": { "type": "number", "description": "Torque in Newton-meters." },
+                "brakePressure": { "type": "number", "description": "Brake pressure (assumed Pascals)." }
+              }
+            },
+            "description": "Array of drive points (e.g., wheels) with their properties."
+          },
+          "aerodynamics": {
+            "type": "object",
+            "required": ["liftCoefficient", "dragCoefficient", "yawCoefficient"],
+            "properties": {
+              "liftCoefficient": { "type": "number", "description": "Lift coefficient." },
+              "dragCoefficient": { "type": "number", "description": "Drag coefficient." },
+              "yawCoefficient": { "type": "number", "description": "Yaw coefficient." }
+            },
+            "description": "Aerodynamic properties of the object."
+          },
+          "feedbackItem": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "value"],
+              "properties": {
+                "name": { "type": "string", "description": "Name of the feedback item (e.g., 'altitude')." },
+                "value": { "type": "number", "description": "Value of the feedback item." }
+              }
+            },
+            "description": "Array of key-value pairs for additional feedback data."
+          }
+        },
+        "description": "Core motion data for the object, including position and orientation in world space."
+      }
     },
-    "$defs": {
-        "name": { "type": "string" },
+    "examples": [
+      {
+        "gameName": "RacingSim",
+        "timestamp": 1.234,
         "motionObject": {
-            "type": "object",
-            "required": [ "accelerationX", "accelerationY", "accelerationZ", "positionX", "positionY", "positionZ", "rotationX", "rotationY", "rotationZ", "velocityX", "velocityY", "velocityZ" ],
-            "properties": {
-                "objectName": {
-                    "description": "Name of motionObject, every instance should be unique per game to allow for motion profile tweaking",
-                    "$ref": "#/$defs/name"
-                },
-                "objectLocation": {
-                    "description": "Name of location within game. eg. place, airport code, track name",
-                    "$ref": "#/$defs/name",
-                    "$comment": "TODO: is this useful/required?"
-                },
-                "objectType": {
-                    "description": "Type of object. eg. aircraft, atv, boat, helicopter, hovercraft, motorcycle, spacecraft, submersible, tank, terrestrial, train, truck",
-                    "$ref": "#/$defs/name",
-                    "$comment": "TODO: define allowed values using enum? https://json-schema.org/understanding-json-schema/reference/enum"
-                },
-                "accelerationX": {
-                    "type": "number",
-                    "description": "Acceleration on axis https://en.wikipedia.org/wiki/Acceleration",
-                    "units": "m/s^2",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "accelerationY": {
-                    "type": "number",
-                    "description": "Acceleration on axis https://en.wikipedia.org/wiki/Acceleration",
-                    "units": "m/s^2",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "accelerationZ": {
-                    "type": "number",
-                    "description": "Acceleration on axis https://en.wikipedia.org/wiki/Acceleration",
-                    "units": "m/s^2",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "positionX": {
-                    "type": "number",
-                    "description": "Position in the world in metres",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "positionY": {
-                    "type": "number",
-                    "description": "Position in the world in metres",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "positionZ": {
-                    "type": "number",
-                    "description": "Position in the world in metres",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "rotationX": {
-                    "type": "number",
-                    "description": "Rotational position https://en.wikipedia.org/wiki/Radian",
-                    "units": "rad",
-                    "minimum": "" ,
-                    "maximum": "",
-                    "$comment": "TODO: validate radians is best unit"
-                },
-                "rotationY": {
-                    "type": "number",
-                    "description": "Rotational position https://en.wikipedia.org/wiki/Radian",
-                    "units": "rad",
-                    "minimum": "" ,
-                    "maximum": "",
-                    "$comment": "TODO: validate radians is best unit"
-                },
-                "rotationZ": {
-                    "type": "number",
-                    "description": "Rotational position https://en.wikipedia.org/wiki/Radian",
-                    "units": "rad",
-                    "minimum": "" ,
-                    "maximum": "",
-                    "$comment": "TODO: validate radians is best unit"
-                },
-                "velocityX": {
-                    "type": "number",
-                    "description": "Velocity on axis https://en.wikipedia.org/wiki/Velocity",
-                    "units": "m/s",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "velocityY": {
-                    "type": "number",
-                    "description": "Velocity on axis https://en.wikipedia.org/wiki/Velocity",
-                    "units": "m/s",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "velocityZ": {
-                    "type": "number",
-                    "description": "Velocity on axis https://en.wikipedia.org/wiki/Velocity",
-                    "units": "m/s",
-                    "minimum": "" ,
-                    "maximum": ""
-                },
-                "aerodynamics": {
-                    "type": "object",
-                    "properties": {
-                        "drag_coefficient": {
-                            "type": "number",
-                            "description": "A measure of the drag force experienced by an object moving through a fluid, such as air or water. https://en.wikipedia.org/wiki/Drag_coefficient",
-                        },
-                        "lift_coefficient": {
-                            "type": "number",
-                            "description": "A measure of the lift force generated by an object, such as an airfoil or a wing, as it moves through a fluid, typically air. https://en.wikipedia.org/wiki/Lift_coefficient"
-                        },
-                        "yaw_moment_coefficient": {
-                            "type": "number",
-                            "description": "A measure of the aerodynamic forces that cause a rotating object, such as an aircraft or a vehicle, to yaw or rotate about its vertical axis. It quantifies the effectiveness of the object's aerodynamic surfaces in producing a yawing moment. https://en.wikipedia.org/wiki/Aircraft_flight_dynamics"
-                        }
-                    }
-                },
-                "drivePoints": {
-                    "type": "array",
-                    "description": "An array of drivepoint objects",
-                    "items": { "$ref": "#/$defs/drivePoint" }
-                },
-                "feedbackItems": {
-                    "type": "array",
-                    "description": "An array of feedbackItem objects, display readouts etc",
-                    "items": { "$ref": "#/$defs/feedbackItem" }
-                }
-            }
-        },
-        "drivePoint": {
-            "type": "object",
-            "required": [ "name", "type", "currentTerrain", "cogOffsetX", "cogOffsetY", "cogOffsetZ", "travelX", "travelY", "travelZ" ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "Name of drivepoint, must be unique per motionObject"
-                },
-                "type": {
-                    "type": "string",
-                    "description": "type of drivepoint, eg. wheel, propeller, jet, track, sail, waterjet, leg",
-                    "$comment": "TODO: ratify allowed types"
-                },
-                "currentTerrain": {
-                    "type": "string",
-                    "description": "Name of current terrain type this drivepoint is in contact with",
-                    "$comment": "TODO: define allowed list of types.. atmosphere, asphalt, dirt, rumble strip, gas, liquid, solid"
-                },
-                "cogOffsetX": {
-                    "type": "number",
-                    "description": "Position offset of drivepoint in relation to centre of gravity",
-                    "units": "metres"
-                },
-                "cogOffsetY": {
-                    "type": "number",
-                    "description": "Position offset of drivepoint in relation to centre of gravity",
-                    "units": "metres"
-                },
-                "cogOffsetZ": {
-                    "type": "number",
-                    "description": "Position offset of drivepoint in relation to centre of gravity",
-                    "units": "metres"
-                },
-                "travelX": {
-                    "type": "array",
-                    "description": "Array representing travel and resistance from the defined offset point. Travel measured in meters as two floating-point numbers, positive and negative movement distance. Stiffness is represented as a floating-point number in N/m of force required to produce a unit displacement.",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "travelY": {
-                    "type": "array",
-                    "description": "Array representing travel and resistance from the defined offset point. Travel measured in meters as two floating-point numbers, positive and negative movement distance. Stiffness is represented as a floating-point number in N/m of force required to produce a unit displacement.",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "travelZ": {
-                    "type": "array",
-                    "description": "Array representing travel and resistance from the defined offset point. Travel measured in meters as two floating-point numbers, positive and negative movement distance. Stiffness is represented as a floating-point number in N/m of force required to produce a unit displacement.",
-                    "items": {
-                        "type": "number"
-                    }
-                }
-            }
-        },
-        "feedbackItem": {
-            "type": "object",
-            "required": [ "name", "type", "value"],
-            "properties": {
-                "name": {
-                    "description": "Name of feedback item",
-                    "type": "string"
-                },
-                "type": {
-                    "description": "datatype of feedbackItem value field (boolean, integer, number, string)",
-                    "type": "string"
-                },
-                "value": {
-                    "description": "Current value for feedbackItem",
-                    "anyOf": [
-                        { "type": "string" },
-                        { "type": "number" },
-                        { "type": "integer" },
-                        { "type": "boolean" }
-                    ]
-                },
-                "max": {
-                    "description": "Maximium value for feedbackItem",
-                    "type": "number"
-                },
-                "min": {
-                    "description": "Minimum value for feedbackItem",
-                    "type": "number"
-                },
-                "unit": {
-                    "description": "Measurment unit of value key. eg mm, cm, bar, m/s, percentage etc",
-                    "type": "string"
-                }
-            }
-        }
-    }
-}
+          "objectLocation": "track",
+          "objectName": "player_car",
+          "objectType": "vehicle",
+          "positionX": 1.5,
+          "positionY": 2.0,
+          "positionZ": 0.0,
+          "forward": { "x": 0.0, "y": 0.0,
