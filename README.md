@@ -6,6 +6,20 @@ It defines a logical minimal set of required telemetry to meet the standard, whi
 
 It defines the network protocols and provides tools to aid implementation in multiple game engines.
 
+## Implementation
+
+### Data format
+
+We propose using Cap'n Proto as the data format. Cap’n Proto is a zero-copy, binary serialization format optimized for speed and efficiency, making it an excellent choice for sending motion telemetry data over UDP. It avoids encoding/decoding overhead by using a memory-aligned layout, and it supports optional fields and nested structures efficiently.
+
+[Implementation details for Cap'n Proto data format](implementation-capnproto.md).
+
+### Data Transport
+
+We propose using Aeron as the data transport. Aeron is a high-performance messaging library that provides low-latency, reliable communication over UDP. It is designed to work well in environments with high message rates and low latency requirements, such as gaming. It allows for multicasting, which can be useful if multiple clients need to receive the same telemetry data.
+
+[Implementation details for Aeron data transport](implementation-aeron.md).
+
 ## Scope
 
 The scope of the LTS encompasses the following key areas:
@@ -66,17 +80,3 @@ The LTS does not dictate or influence the business models, pricing strategies, o
 ## Decision Points and Trade-offs
 
 With the need to support console devices any implementation method that only works with telemetry client software, or hardware directly running or connected to the device executing the game will not be entertained.
-
-## Implementation
-
-### Data format
-
-We propose using Cap'n Proto as the data format. Cap’n Proto is a zero-copy, binary serialization format optimized for speed and efficiency, making it an excellent choice for sending motion telemetry data over UDP. It avoids encoding/decoding overhead by using a memory-aligned layout, and it supports optional fields and nested structures efficiently.
-
-[Implementation details for Cap'n Proto data format](implementation-capnproto.md).
-
-### Data Transport
-
-We propose using Aeron as the data transport. Aeron is a high-performance messaging library that provides low-latency, reliable communication over UDP. It is designed to work well in environments with high message rates and low latency requirements, such as gaming. It allows for multicasting, which can be useful if multiple clients need to receive the same telemetry data.
-
-[Implementation details for Aeron data transport](implementation-aeron.md).
