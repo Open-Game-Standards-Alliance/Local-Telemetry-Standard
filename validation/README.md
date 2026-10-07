@@ -35,6 +35,7 @@ Results so far:
 | [12-flypt-cor.md](12-flypt-cor.md) | FlyPT Mover documentation (center of rotation) | Requirement adopted — `referencePoint` + `namedPoints` close the silent reference-point contract; correction stays consumer-side |
 | [13-extensibility.md](13-extensibility.md) | Design review — custom datapoints at two cadences | Supported — streamed channels (motion) + session channels (`values` in discovery); late joiners get whole state from discovery |
 | [14-iracing.md](14-iracing.md) | iRacing SDK official documentation (~250 vars + session YAML) | Covers + adopts `damperVelocity`; both dynamics reps native; session `values` exercised; multi-car grid guidance |
+| [15-xplane12.md](15-xplane12.md) | X-Plane 12 classic Data Set Output table | Covers — near-perfect `bodyDynamics` source (G triple + P/Q/R, 6th confirmation); imperial→SI recipes; moments → channels |
 
 Cross-domain results: every tested vehicle class maps to the two-layer
 model using schema fields, annex channels, and channel families — no
