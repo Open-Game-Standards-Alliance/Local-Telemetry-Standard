@@ -179,7 +179,7 @@ private:
 
     bool onMotion(MotionFrame::Reader f) {
         for (MotionObject::Reader obj : f.getObjects()) {
-            // obj.getPosition(), obj.getForward(), obj.getUp() …
+            // obj.getPosition(), obj.getOrientation() …
             // Derive velocity/acceleration from pose deltas when absent.
             // If a descriptor declared a range, drop out-of-range values.
         }
@@ -220,8 +220,8 @@ Every reference plugin ships with:
 4. **Blueprint / visual-scripting friendly wrappers** — setting position or
    a channel is one node call.
 
-Start minimal: a game streaming position/forward/up per tick is fully
-compliant and useful (~76 bytes/frame) — see "The minimal sender" in
+Start minimal: a game streaming position/orientation per tick is fully
+compliant and useful (~68 bytes/frame) — see "The minimal sender" in
 [implementation-capnproto.md](implementation-capnproto.md).
 
 Operational notes:

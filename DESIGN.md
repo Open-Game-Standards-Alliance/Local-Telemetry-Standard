@@ -31,7 +31,7 @@ The standard therefore defines two frames with separate cadences:
 | Frame | Cadence | Contents |
 |---|---|---|
 | `DiscoveryFrame` | once per session, re-sent on change | game name, session anchor, environment, object descriptors, drive-point descriptors (incl. suspension spec), channel descriptors (id, name, unit, range, description) |
-| `MotionFrame` | ~60 Hz | timestamp, per-object pose (position, forward, up), optional velocity/acceleration, drive-point state (typed union), channel values (id + typed value) |
+| `MotionFrame` | ~60 Hz | timestamp, per-object pose (position, orientation quaternion), optional velocity/acceleration, drive-point state (typed union), channel values (id + typed value) |
 
 This is the same split as motorsport CAN + DBC files: declare the signal
 dictionary once, stream bare values. Senders key everything by `UInt16` ids
@@ -53,9 +53,10 @@ discovery re-send.
 `MotionFrame` carries the samples:
 
 - `timestamp` — seconds since session start.
-- `objects` — one `MotionObject` per descriptor: pose core (position, forward,
-  up — the required minimal set), optional velocity/acceleration, and per-tick
-  drive-point state and channel values, keyed by the discovery ids.
+- `objects` — one `MotionObject` per descriptor: pose core (position,
+  orientation quaternion — the required minimal set), optional
+  velocity/acceleration, and per-tick drive-point state and channel values,
+  keyed by the discovery ids.
 
 Drive points are typed on both sides: the descriptor carries static geometry
 (suspension travel/stiffness, wheel radius/driven/steered, propeller
@@ -101,7 +102,14 @@ breaking deployed receivers (see §7).
   sane error handling — clients drop out-of-range values — without paying the
   cost on every frame.
 - **Coordinate system.** Left-handed, Z-forward, Y-up, world space.
-  Quaternion vs forward/up vectors stays an open question (§9).
+- **Orientation as a unit quaternion.** The pose core carries `position` +
+  `orientation` (`Quaternion`, x/y/z/w, unit norm, either sign; rotates LTS
+  world axes into object body axes). Chosen over a forward/up vector pair
+  because the primary consumers — motion-control (cueing) and
+  motion-compensation software — work natively in quaternions, and
+  interpolation across packet loss (`slerp`/`nlerp`) is the boring standard
+  path. Decided pre-release, so no representation duality exists: no
+  optional vector pair, no receiver-side basis conversion.
 - **Plain UDP over a messaging library.** At 60–120 Hz with sub-500-byte
   packets, transport latency is a few hundred microseconds at most — noise
   next to the physics tick, cueing filters, and actuator response. A high-
@@ -113,7 +121,7 @@ breaking deployed receivers (see §7).
 
 ## 6. Wire sizes
 
-- `MotionFrame`, one object, pose only: ~76 bytes.
+- `MotionFrame`, one object, pose only: ~68 bytes.
 - + 4 wheels (`WheelState`) + 8 channels ≈ +200 bytes — still far under a
   1400-byte UDP MTU at 60 Hz.
 - `DiscoveryFrame`: ~300–800 bytes once per session (strings dominate);
@@ -142,9 +150,7 @@ configurable. See `implementation-udp.md`.
 
 ## 9. Open questions
 
-1. Orientation as quaternion vs forward/up vector pair (precision vs size vs
-   gimbal concerns).
-2. `objectType` as a ratified enum (aircraft/atv/boat/...) vs free text.
-3. Channel-name namespace: informal (`engine.rpm`) vs a registry to prevent
+1. `objectType` as a ratified enum (aircraft/atv/boat/...) vs free text.
+2. Channel-name namespace: informal (`engine.rpm`) vs a registry to prevent
    receiver-side guessing.
-4. Whether `GenericState` should grow a small fixed payload (force vector).
+3. Whether `GenericState` should grow a small fixed payload (force vector).

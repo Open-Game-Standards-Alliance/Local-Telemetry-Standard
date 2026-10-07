@@ -22,7 +22,7 @@ This generates `open_motion_telemetry.capnp.h` and `open_motion_telemetry.c++`.
 ## The minimal sender
 
 The smallest compliant stream is one object with pose only — no drive points,
-no channels (~76 bytes per frame). A motion platform can already drive from
+no channels (~68 bytes per frame). A motion platform can already drive from
 this; everything else in the standard is additive:
 
 ```cpp
@@ -42,8 +42,8 @@ f.setTimestamp(t);                    // seconds since session start
 MotionObject::Builder obj = f.initObjects(1)[0];
 obj.setName("player");
 obj.initPosition().setX(x); obj.getPosition().setY(y); obj.getPosition().setZ(z);
-obj.initForward().setZ(1.0f);         // unit vectors: Z-forward, Y-up
-obj.initUp().setY(1.0f);
+auto q = obj.initOrientation();       // unit quaternion: LTS world -> object
+q.setX(0.0f); q.setY(0.0f); q.setZ(0.0f); q.setW(1.0f);  // identity
 // send as frame type 0x01
 ```
 
@@ -133,8 +133,8 @@ kj::Array<capnp::word> buildMotion(double timestampSeconds) {
 
     // Pose core — the required minimal set (left-handed, Z-forward, Y-up)
     car.initPosition().setX(1.5f);  // …setY/setZ similarly
-    car.initForward().setZ(1.0f);   // unit vector
-    car.initUp().setY(1.0f);        // unit vector
+    auto q = car.initOrientation(); // unit quaternion, LTS world -> object axes
+    q.setZ(0.0f); q.setW(1.0f);     // identity; …setX/setY for actual rotation
     // velocity/acceleration are optional — omit them and receivers derive
     // them from pose deltas
 
@@ -188,7 +188,7 @@ void onMotion(kj::ArrayPtr<const capnp::word> words) {
     MotionFrame::Reader f = message.getRoot<MotionFrame>();
 
     for (MotionObject::Reader obj : f.getObjects()) {
-        // obj.getPosition(), obj.getForward(), obj.getUp() …
+        // obj.getPosition(), obj.getOrientation() …
         for (ChannelValue::Reader v : obj.getChannels()) {
             switch (v.which()) {
                 case ChannelValue::NUMBER:  /* v.getNumber() */ break;
@@ -210,7 +210,7 @@ Cap'n Proto requires 8-byte word alignment — the UDP envelope is 8 bytes, so a
 
 ## Wire size
 
-- `MotionFrame`, one object, pose only: ~76 bytes.
+- `MotionFrame`, one object, pose only: ~68 bytes.
 - Four wheels + eight channels ≈ +200 bytes — comfortably under a 1400-byte UDP MTU at 60 Hz.
 - `DiscoveryFrame`: ~300–800 bytes, sent once per session — strings dominate, so declare channels generously; they cost nothing per frame.
 

@@ -26,6 +26,16 @@ struct Vector3 {
   z @2 :Float32;
 }
 
+struct Quaternion {
+  # Unit quaternion (senders must normalize; receivers may renormalize
+  # defensively). Either sign represents the same rotation. Rotates LTS
+  # world axes (left-handed, Z-forward, Y-up) into object body axes.
+  x @0 :Float32;
+  y @1 :Float32;
+  z @2 :Float32;
+  w @3 :Float32;
+}
+
 struct Range {
   min @0 :Float64;
   max @1 :Float64;
@@ -136,8 +146,7 @@ struct MotionObject {
 
   # Core pose — the LTS minimal set.
   position @1 :Vector3;            # world space, meters, left-handed, Z-forward, Y-up
-  forward @2 :Vector3;             # unit vector
-  up @3 :Vector3;                  # unit vector
+  orientation @2 :Quaternion;      # unit quaternion: LTS world -> object axes
 
   # Derived kinematics — optional (null pointer = not provided). Receivers that
   # need them derive from pose deltas when absent; senders that already compute
