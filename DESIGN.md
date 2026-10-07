@@ -29,6 +29,12 @@ Coordinate system (normative):
   world axes into body axes.
 - **Object-local frame** — one sender-chosen origin per object (typically
   the CG), used by drive-point offsets and named points (§3).
+- **Precision** — all wire floats are Float32. World `position` assumes a
+  session-stable local origin: large-world senders (globe-spanning flight
+  sims) re-origin on teleport/session start rather than emitting absolute
+  planetary coordinates. Geographic lat/lon rides channels, where Float32
+  gives ~1 m precision at Earth magnitudes — display-grade, not navigation-
+  grade; senders needing more split degrees from fractional degrees.
 
 ## 2. Core idea: two layers
 
