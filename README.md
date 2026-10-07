@@ -22,10 +22,27 @@ clients (dashboards, motion rigs, haptics, loggers) join the same multicast
 group; no extra ports or proxying.
 
 [Implementation details for UDP data transport](implementation-udp.md).
-[MSFS 2024 sender reference](reference-msfs2024.md) — the SimVar set mapped
-onto LTS core schema plus sender-declared channels.
-[iRacing sender reference](reference-iracing.md) — the irsdk set (telemetry
-+ session YAML) mapped the same way, with multi-car grid guidance.
+
+### Sender references
+
+Per-game implementation references: core schema mapping plus sender-declared
+channel tables, ready to build against.
+
+- [MSFS 2024 sender reference](reference-msfs2024.md) — the full SimVar set
+  (1,354 variables) mapped onto LTS core schema plus channels, with
+  conversions, cadences, and large-world precision guidance.
+- [iRacing sender reference](reference-iracing.md) — the irsdk set (telemetry
+  + session-string YAML) mapped the same way, with multi-car grid guidance
+  and capture-verify unit rules.
+
+### Validation
+
+The standard is validated against real sources — 16 tests across 6 source
+classes (documented game formats, community memory offsets,
+vendor-encapsulated integrations, game-native UDP outputs, injected
+providers, consumer documentation), 100+ game outputs, zero open gaps.
+
+[Validation tests and results](validation/README.md).
 
 ### Schema (v1, two-layer)
 
@@ -58,7 +75,7 @@ The LTS establishes standardized formats and schemas for organizing and structur
 
 The LTS specifies standardized communication protocols and APIs for transmitting telemetry data to devices and software on the users local network.
 
-## What OGTS Does Not Cover
+## What the LTS Does Not Cover
 
 While the LTS aims to provide a comprehensive framework for local telemetry transmission in the gaming industry, it does not cover the following areas:
 
@@ -85,7 +102,7 @@ The LTS does not dictate or influence the business models, pricing strategies, o
 
 - Must be network efficient
 - Must have low latency at all areas of implementation
-- Does not allow update of data within game (read-only) *TBC*
+- Does not allow update of data within game (read-only — see [DESIGN.md](DESIGN.md), Non-goals)
 
 ## Examples and Scenarios
 
