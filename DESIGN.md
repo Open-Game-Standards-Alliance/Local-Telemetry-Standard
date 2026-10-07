@@ -130,6 +130,15 @@ breaking deployed receivers (see §7).
   aircraft, the game re-sends discovery with a new primary object and
   `ObjectType`; receivers watching discovery switch cueing presets
   automatically.
+- **Common Channels annex.** Cross-game semantics are ratified in
+  [`CHANNELS.md`](CHANNELS.md): an optional vocabulary of well-known channel
+  names **with required units** (`engine.rpm` is `rpm`). Senders SHOULD use
+  ratified names when the concept matches and MUST NOT reuse a ratified name
+  with a different unit; everything else stays free-form. Receivers match
+  exactly and fall back to per-game profiles — never fuzzy-match. Binding is
+  already solved by discovery ids, so the annex is semantic convenience at
+  zero wire cost. New entries require the concept in ≥2 shipping games and a
+  reviewed PR; entries are never renamed or re-united.
 - **Plain UDP over a messaging library.** At 60–120 Hz with sub-500-byte
   packets, transport latency is a few hundred microseconds at most — noise
   next to the physics tick, cueing filters, and actuator response. A high-
@@ -170,6 +179,4 @@ configurable. See `implementation-udp.md`.
 
 ## 9. Open questions
 
-1. Channel-name namespace: informal (`engine.rpm`) vs a registry to prevent
-   receiver-side guessing.
-2. Whether `GenericState` should grow a small fixed payload (force vector).
+1. Whether `GenericState` should grow a small fixed payload (force vector).

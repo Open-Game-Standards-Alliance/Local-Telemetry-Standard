@@ -99,7 +99,9 @@ kj::Array<capnp::word> buildDiscovery() {
         wheel.setSteered(i < 2);
     }
 
-    // Channels: any datapoint the game wants to expose, self-describing
+    // Channels: any datapoint the game wants to expose, self-describing.
+    // Ratified names from CHANNELS.md auto-map in receivers — use them when
+    // the concept matches.
     auto channels = car.initChannels(3);
     auto rpm = channels[0];
     rpm.setId(0).setName("engine.rpm").setUnit("rpm");
