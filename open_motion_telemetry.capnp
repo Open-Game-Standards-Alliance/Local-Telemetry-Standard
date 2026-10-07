@@ -107,6 +107,16 @@ struct ObjectDescriptor {
                                    # driver eye, seats...) for consumer corrections
   drivePoints @3 :List(DrivePointDescriptor);
   channels @4 :List(ChannelDescriptor);
+  values @9 :List(ChannelValue);    # current values of session-scoped channels
+                                   # (rarely-changing datapoints: setup, session
+                                   # type, stage name, weather preset). Discovery
+                                   # is re-sent when one changes, so late-joining
+                                   # receivers get complete state from discovery
+                                   # alone. Fast-changing channels stream in
+                                   # MotionObject.channels instead; a channel
+                                   # lives in one layer — moving it re-sends
+                                   # lives in one layer — moving it re-sends
+                                   # discovery.
 }
 
 struct NamedPoint {

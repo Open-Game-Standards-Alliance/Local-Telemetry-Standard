@@ -119,6 +119,23 @@ breaking deployed receivers (see §7).
 - **Typed channel values.** Booleans (headlights, wipers) and text (mode labels)
   are first-class, not abused floats. Text at high rate is discouraged by
   comment, not banned — dashboards sometimes need label changes.
+- **Two channel cadences.** Custom datapoints come in two speeds, and the
+  layer follows the cadence (the same principle that splits discovery from
+  motion):
+  - *Streamed channels* — fast-changing values (tyre temps, boost pressure,
+    assist states) ride `MotionObject.channels` per tick. Absence means
+    unchanged: receivers keep the latest known value per id; late joiners
+    converge within one tick of each sender's rate.
+  - *Session channels* — rarely-changing values (setup, session type, stage
+    name, weather preset, labels) carry their current value in
+    `ObjectDescriptor.values`. A change re-sends discovery, so a receiver
+    that joins mid-session learns every session value from discovery alone —
+    the delta stream never strands late joiners. This is where text labels
+    naturally live.
+  A channel lives in one layer; moving it between layers is a discovery
+  change. Session-scoped datapoints that belong to the session rather than
+  any object (server name, weather) attach to the primary object's channel
+  set. (Validation: [13-extensibility.md](validation/13-extensibility.md).)
 - **Optional dynamics, one native representation.** Senders provide
   whichever dynamics representation they measure natively: world-space
   `kinematics` (velocity + acceleration) or body-frame `bodyDynamics`
