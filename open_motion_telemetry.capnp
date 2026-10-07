@@ -101,17 +101,19 @@ struct ObjectDescriptor {
   primary @6 :Bool;                # reference object for motion rigs / compensation;
                                    # exactly one SHOULD be set per discovery frame
   referencePoint @7 :NamedPoint;   # where reported pose/dynamics are measured;
-                                   # default (name "", zero) = vehicle origin
-  points @8 :List(NamedPoint);     # other named vehicle-local points (cg, pilot,
+                                   # default (name "", zero) = the object-local
+                                   # frame origin (typically the CG)
+  namedPoints @8 :List(NamedPoint);# other named vehicle-local points (cg, pilot,
                                    # driver eye, seats...) for consumer corrections
   drivePoints @3 :List(DrivePointDescriptor);
   channels @4 :List(ChannelDescriptor);
 }
 
 struct NamedPoint {
-  # A labeled position in vehicle-local coordinates (meters, same axes as the
-  # orientation quaternion). Reference points let consumers correct received
-  # motion to their own pivot/head position (lever-arm corrections):
+  # A labeled position in the object-local frame (meters; same sender-chosen
+  # frame as the drive-point offsets — typically the CG — and the same axes
+  # as the orientation quaternion). Reference points let consumers correct
+  # received motion to their own pivot/head position (lever-arm corrections):
   #   a_seat = a_ref + alpha x r + omega x (omega x r),   r = seat - referencePoint
   # LTS transports the declared reference and named points; the correction
   # itself is consumer-side. Conventional names: "cg", "pilot", "driverEye".
@@ -126,7 +128,12 @@ struct ChannelDescriptor {
   id @0 :UInt16;
   name @1 :Text;                   # stable identifier, e.g. "engine.rpm"
   unit @2 :Text;                   # e.g. "rpm", "m/s", "bar", "" = unitless
-  range @3 :Range;                 # optional (null when unbounded)
+  union {
+    # Struct fields are inline (not nullable); the discriminant carries
+    # range optionality.
+    noRange @3 :Void;              # default: unbounded / unknown
+    range @5 :Range;               # declared operating range
+  }
   description @4 :Text;            # human-readable, shown by dash tools
 }
 
@@ -140,8 +147,11 @@ struct SuspensionSpec {
 struct DrivePointDescriptor {
   id @0 :UInt16;
   name @1 :Text;                   # e.g. "wheel_front_left"
-  cogOffset @2 :Vector3;           # offset from object center of gravity, meters
-  suspension @3 :SuspensionSpec;   # optional (null: not applicable)
+  offset @2 :Vector3;              # position in the object-local frame, meters.
+                                   # One sender-chosen frame per object (typically
+                                   # the CG); NamedPoints use the same frame, and
+                                   # consumers only use differences, which are
+                                   # frame-invariant
   union {
     # Static, type-specific geometry. Extensible: add variants in v1.x —
     # old receivers skip unknown variants (unknown-union discriminant).
@@ -158,6 +168,12 @@ struct WheelSpec {
   radius @0 :Float32;              # meters
   driven @1 :Bool;                 # power delivered through this wheel
   steered @2 :Bool;
+  union {
+    # Inline struct fields are not nullable, so suspension optionality rides
+    # this discriminant — the same pattern as the state structs.
+    noSuspension @3 :Void;         # default: not applicable
+    suspension @4 :SuspensionSpec; # travel / stiffness / damping
+  }
 }
 
 struct PropellerSpec {
@@ -182,7 +198,9 @@ struct MotionObject {
   name @0 :Text;                   # matches ObjectDescriptor.name
 
   # Core pose — the LTS minimal set.
-  position @1 :Vector3;            # world space, meters, left-handed, Z-forward, Y-up
+  position @1 :Vector3;            # world position of the object's referencePoint
+                                   # (object-local frame origin by default), meters,
+                                   # left-handed, Z-forward, Y-up
   orientation @2 :Quaternion;      # unit quaternion: LTS world -> object axes
 
   # Dynamics — optional; exactly one representation, whichever the sender

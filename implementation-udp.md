@@ -194,6 +194,20 @@ private:
 };
 ```
 
+## Liveness and session end
+
+The sender gives no explicit goodbye, so receivers detect liveness from
+the stream itself:
+
+- Motion frames are the heartbeat. If no motion frame arrives for ~5×
+  the expected tick interval (or 1 s when the rate is unknown), mark the
+  session stale: hold the last pose, stop driving actuators toward new
+  targets, and surface the state in UI.
+- Discovery re-sends (every 2 s) confirm session identity; a discovery
+  frame with a new `sessionStartUnixUs` is a new session — reset state.
+- After 10 s with no frame of any type, treat the session as ended and
+  release per-sender resources.
+
 ## Engine integration (Unity / Unreal / Godot)
 
 The schema and wire format are engine-agnostic; the integration path is a

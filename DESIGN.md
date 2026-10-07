@@ -17,6 +17,19 @@ The schema serves the LTS requirements:
 - Supports multiple local clients (dashboards, motion rigs, haptics, loggers)
   without extra ports or proxying — via multicast.
 
+Coordinate system (normative):
+
+- **World frame** — left-handed, +Z forward, +Y up, +X right, meters,
+  seconds.
+- **Body frame** — the world frame rotated by the object's quaternion:
+  x +right (sway), y +up (heave), z +forward (surge); rotations x +nose-up
+  pitch, y +nose-right yaw, z +roll right-down.
+- **Orientation** — unit quaternion (senders normalize; receivers may
+  renormalize defensively); either sign is the same rotation; rotates
+  world axes into body axes.
+- **Object-local frame** — one sender-chosen origin per object (typically
+  the CG), used by drive-point offsets and named points (§3).
+
 ## 2. Core idea: two layers
 
 Telemetry data divides cleanly into two kinds with different change rates:
@@ -30,7 +43,7 @@ The standard therefore defines two frames with separate cadences:
 
 | Frame | Cadence | Contents |
 |---|---|---|
-| `DiscoveryFrame` | once per session, re-sent on change | game name, session anchor, environment, object descriptors, drive-point descriptors (incl. suspension spec), channel descriptors (id, name, unit, range, description) |
+| `DiscoveryFrame` | once per session, re-sent on change | game name, session anchor, environment, object descriptors, drive-point descriptors (suspension spec rides WheelSpec), channel descriptors (id, name, unit, range, description) |
 | `MotionFrame` | ~60 Hz | timestamp, per-object pose (position, orientation quaternion), optional velocity/acceleration, drive-point state (typed union), channel values (id + typed value) |
 
 This is the same split as motorsport CAN + DBC files: declare the signal
@@ -50,12 +63,19 @@ discovery re-send.
 - `objects` — one `ObjectDescriptor` per streamed object (the `primary`
   flag marks the reference object): identity (`name`, `type` — a ratified
   `ObjectType` enum plus optional `typeLabel` for display — and `location`),
-  `referencePoint` (the vehicle-local point the reported pose and dynamics
-  are measured at; default vehicle origin), `points` (other named
-  vehicle-local points such as `cg`, `pilot`, `driverEye` — declared so
-  consumers can correct motion to their own pivot/head position with the
-  lever-arm terms `a + α×r + ω×(ω×r)`; the correction itself is
-  consumer-side), `DrivePointDescriptor`s, `ChannelDescriptor`s.
+  `referencePoint` and `namedPoints`, `DrivePointDescriptor`s,
+  `ChannelDescriptor`s (below).
+- One **object-local frame** per object: drive-point offsets and named
+  points share a single sender-chosen origin (typically the CG, otherwise
+  the model origin); `MotionObject.position` is the world position of the
+  declared `referencePoint`. Consumers only use differences between
+  declared points, which are frame-invariant.
+- `referencePoint` (the object-local point the reported pose and dynamics
+  are measured at; default = the object-local frame origin, typically the
+  CG) and `namedPoints` (other named points such as `cg`, `pilot`,
+  `driverEye`) let consumers correct motion to their own pivot/head
+  position with the lever-arm terms `a + α×r + ω×(ω×r)`; the correction
+  itself is consumer-side. Suspension geometry rides `WheelSpec`.
 
 `MotionFrame` carries the samples:
 

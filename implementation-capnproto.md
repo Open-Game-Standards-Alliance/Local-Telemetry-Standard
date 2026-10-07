@@ -82,9 +82,9 @@ kj::Array<capnp::word> buildDiscovery() {
     car.setLocation("spa");
 
     // Reference point: where reported pose/dynamics are measured.
-    // Default (unset) = vehicle origin. Senders whose data is CG-relative
-    // (most flight sims) declare it so consumers can apply lever-arm
-    // corrections to their own pivot/head position.
+    // Default (unset) = the object-local frame origin (typically the CG).
+    // Senders measuring elsewhere declare it so consumers can apply
+    // lever-arm corrections to their own pivot/head position.
     NamedPoint::Builder ref = car.initReferencePoint();
     ref.setName("cg");
     ref.initPosition().setZ(-1.2f);   // CG 1.2 m behind origin, vehicle-local
@@ -96,16 +96,16 @@ kj::Array<capnp::word> buildDiscovery() {
         auto p = points[i];
         p.setId(i);
         p.setName(names[i]);
-        p.initCogOffset().setX(-0.8f);  // tune per corner; y/z omitted for brevity
-        auto susp = p.initSuspension();
-        susp.initTravel().setMin(-0.05f);  // meters
-        susp.getTravel().setMax(0.15f);
-        susp.setStiffness(65000.0f);       // N/m
-        susp.setDamping(5000.0f);          // N·s/m (0 = unspecified)
+        p.initOffset().setX(-0.8f);  // tune per corner; y/z omitted for brevity
         auto wheel = p.initWheel();
         wheel.setRadius(0.34f);
         wheel.setDriven(true);
         wheel.setSteered(i < 2);
+        auto susp = wheel.initSuspension();   // optional: skip = noSuspension
+        susp.initTravel().setMin(-0.05f);  // meters
+        susp.getTravel().setMax(0.15f);
+        susp.setStiffness(65000.0f);       // N/m
+        susp.setDamping(5000.0f);          // N·s/m (0 = unspecified)
     }
 
     // Channels: any datapoint the game wants to expose, self-describing.
@@ -242,7 +242,7 @@ The equivalent self-describing-per-frame JSON would be several times larger on e
 ## Evolution rules
 
 - **Adding fields or variants (v1.x):** receivers built against an older schema skip unknown fields and unknown union discriminants silently — no coordination needed.
-- **Optional fields:** absent fields decode as defaults (0 for numbers, empty for text/lists, null for struct pointers). Always check `hasVelocity()` / `hasRange()` style accessors before using optional data.
+- **Optional data:** optionality is carried by union discriminants (`noDynamics`/`core`/`noRange`/`noSuspension`/…), never by null struct fields — inline struct fields are not nullable in Cap'n Proto. Pointer fields (text, lists, union struct members like `range`, `suspension`) do have `hasX()` accessors; check them or the discriminant before use.
 - **Adding channels or drive points:** change the `DiscoveryFrame` and re-send it; receivers key by id and simply see new entries.
 - **Removing or renumbering ids:** never mid-session — ids are the contract between discovery and motion frames.
 

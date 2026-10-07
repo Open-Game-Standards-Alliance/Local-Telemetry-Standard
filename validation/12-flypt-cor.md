@@ -27,8 +27,8 @@ standard exists to fix.
 
 | FlyPT concept | LTS destination |
 |---|---|
-| data referenced to CG | `ObjectDescriptor.referencePoint` (declared `NamedPoint`; default vehicle origin) |
-| occupant ~14 m ahead of CG | consumer-side: lever arm to its own pivot/head, optionally using declared `points` (`pilot`, `driverEye`, seats) |
+| data referenced to CG | `ObjectDescriptor.referencePoint` (declared `NamedPoint`; default = object-local frame origin (typically the CG)) |
+| occupant ~14 m ahead of CG | consumer-side: lever arm to its own pivot/head, optionally using declared `namedPoints` (`pilot`, `driverEye`, seats) |
 | center-of-rotation correction math | consumer-side (cueing software's layer); LTS transports the declared reference and named points |
 | per-game guessing of the reference | gone — declared once in discovery, re-sent on vehicle change |
 
@@ -38,7 +38,7 @@ zero per-tick cost, additive to v1.
 
 ## Verdict
 
-**Requirement adopted** — `referencePoint` + `points` close the silent
+**Requirement adopted** — `referencePoint` + `namedPoints` close the silent
 contract; the correction itself stays consumer-side by design. No
 per-frame cost.
 
