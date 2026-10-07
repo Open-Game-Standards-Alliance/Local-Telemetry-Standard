@@ -169,7 +169,10 @@ private:
     bool onDiscovery(DiscoveryFrame::Reader d) {
         // (Re)build the id -> descriptor tables: channel names/units/ranges,
         // drive-point geometry, environment. Idempotent — a re-sent
-        // discovery simply overwrites.
+        // discovery simply overwrites. If the primary object's ObjectType
+        // changed (player entered a vehicle/aircraft), switch the cueing
+        // preset — discovery re-sends are the within-game auto-switching
+        // signal.
         channelNames_.clear();
         for (ObjectDescriptor::Reader obj : d.getObjects())
             for (ChannelDescriptor::Reader ch : obj.getChannels())

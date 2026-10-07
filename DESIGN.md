@@ -47,10 +47,10 @@ discovery re-send.
   seconds relative to it.
 - `environment` — ambient conditions of the simulation medium: air density,
   temperature, pressure, gravity, and the dominant medium (`ContactMedium`).
-- `objects` — one `ObjectDescriptor` per streamed object (primary first):
-  identity (`name`, `type` — a ratified `ObjectType` enum plus optional
-  `typeLabel` for display — and `location`), `DrivePointDescriptor`s,
-  `ChannelDescriptor`s.
+- `objects` — one `ObjectDescriptor` per streamed object (the `primary`
+  flag marks the reference object): identity (`name`, `type` — a ratified
+  `ObjectType` enum plus optional `typeLabel` for display — and `location`),
+  `DrivePointDescriptor`s, `ChannelDescriptor`s.
 
 `MotionFrame` carries the samples:
 
@@ -122,6 +122,14 @@ breaking deployed receivers (see §7).
   without breaking deployed receivers. `typeLabel` (optional text) carries
   display flavor; `location` stays free text — pure display data nothing
   switches on.
+- **Explicit `primary` flag.** The descriptor of the reference object — the
+  pose a motion rig reproduces and a compensation tool corrects — carries
+  `primary = true` (exactly one SHOULD be set; receivers fall back to the
+  first object). Combined with discovery re-sends on change, this enables
+  within-game profile switching: when the player enters a vehicle or
+  aircraft, the game re-sends discovery with a new primary object and
+  `ObjectType`; receivers watching discovery switch cueing presets
+  automatically.
 - **Plain UDP over a messaging library.** At 60–120 Hz with sub-500-byte
   packets, transport latency is a few hundred microseconds at most — noise
   next to the physics tick, cueing filters, and actuator response. A high-
@@ -165,5 +173,3 @@ configurable. See `implementation-udp.md`.
 1. Channel-name namespace: informal (`engine.rpm`) vs a registry to prevent
    receiver-side guessing.
 2. Whether `GenericState` should grow a small fixed payload (force vector).
-3. Whether `ObjectDescriptor` should carry an explicit `primary :Bool` flag
-   (today the primary object is only signaled by list ordering).

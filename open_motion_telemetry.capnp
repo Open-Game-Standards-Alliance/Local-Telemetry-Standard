@@ -98,6 +98,8 @@ struct ObjectDescriptor {
   type @1 :ObjectType;             # coarse class; ratifiable enum
   location @2 :Text;               # e.g. track/place name (display-only)
   typeLabel @5 :Text;              # optional display label, e.g. "Formula 1 2024"
+  primary @6 :Bool;                # reference object for motion rigs / compensation;
+                                   # exactly one SHOULD be set per discovery frame
   drivePoints @3 :List(DrivePointDescriptor);
   channels @4 :List(ChannelDescriptor);
 }

@@ -78,6 +78,7 @@ kj::Array<capnp::word> buildDiscovery() {
     car.setName("player_car");
     car.setType(ObjectType::VEHICLE);
     car.setTypeLabel("Formula-style racer");   # optional, display-only
+    car.setPrimary(true);                     # reference object for rigs
     car.setLocation("spa");
 
     // Drive points: four wheels with geometry and suspension
