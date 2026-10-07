@@ -32,23 +32,22 @@ representative, not exhaustive; the goal is coverage classification.
 | per-wheel drive torque | `WheelState.torque` | direct |
 | per-wheel slip ratio / slip angle | `WheelState.slip` | direct |
 | suspension travel / deflection | `WheelState.compression` | direct |
+| per-wheel steering angle (AC `wheelAngl`) | `WheelExtended.steerAngle` (rad, + = left, ISO) | direct |
+| suspension force / tyre vertical load (AC `susForce`/`tyreLoad`) | `WheelExtended.loadForce` (N along suspension axis, measured) | direct |
+| tyre pressure / temps / wear (iRacing 3-temp patches, wear %) | `WheelExtended.tyrePressure` / `tyreTemp` (carcass/average; zone temps → channels) / `tyreWear` (1 = new) | direct |
 | per-wheel brake pressure | `WheelState.brakePressure` | direct |
 | car damage (AC array) | `damage.*` channels | custom channel |
 | drs state | `aids.drs` | custom channel (annex candidate) |
 | lap / position / lap time / session | — | out of scope (race state deferred by design) |
 
-## Gaps found (all resolved in v1)
+## Notes
 
-| # | Field | Resolution |
-|---|---|---|
-| G1 | per-wheel steering angle (AC `wheelAngl`) | `WheelExtended.steerAngle` (rad, + = left, ISO) |
-| G2 | suspension force / tyre vertical load (AC `susForce`/`tyreLoad`) | `WheelExtended.loadForce` (N, measured, incl. damping) + `SuspensionSpec.damping` so receivers can approximate when unmeasured |
-| G3 | tyre pressure / temps / wear (iRacing 3-temp patches, wear %) | `WheelExtended.tyrePressure`/`tyreTemp` (carcass/average; zone temps ride channels)/`tyreWear` (1 = new) |
-
-All ride the all-or-neither `extended` union variant of `WheelState`
-(per-wheel physics pages arrive whole or not at all; Cap'n Proto structs
-allow only one unnamed union, so independent per-field optionals are not
-expressible).
+- `WheelExtended` is all-or-neither: per-wheel physics pages arrive whole
+  (AC/iRacing-style) or not at all; senders lacking some fields send the
+  `core` variant.
+- `SuspensionSpec.damping` (N·s/m, 0 = unspecified) lets receivers
+  approximate load force when the game does not measure it.
+- DRS rides a custom channel (`aids.drs`, annex candidate).
 
 ## Conversion recipes (sender-side integration cost, not gaps)
 
@@ -66,8 +65,7 @@ expressible).
 
 ## Verdict
 
-**Covers cleanly — zero open gaps after pre-release fixes (G1–G3 resolved
-in v1).** Engine/transmission/inputs/per-wheel dynamics including extended
-wheel data all land in schema fields or annex channels with zero
-configuration for a conforming receiver. Wheel count is naturally variable
-(list) — motorcycles (2) and 6-wheel trucks extend trivially.
+**Covers cleanly.** Engine/transmission/inputs/per-wheel dynamics
+including extended wheel data all land in schema fields or annex channels
+with zero configuration for a conforming receiver. Wheel count is naturally
+variable (list) — motorcycles (2) and 6-wheel trucks extend trivially.

@@ -21,15 +21,15 @@ Results so far:
 
 | Test | Domains | Verdict |
 |---|---|---|
-| [01-race-car.md](01-race-car.md) | AC-style + iRacing-style car | Covers cleanly; G1–G3 found and fixed in v1 |
-| [02-prop-aircraft.md](02-prop-aircraft.md) | MSFS SimConnect + X-Plane datarefs | Covers; `ctrl.*`/`wind.*`/`air.*` conventions; PropellerState optionality fixed |
-| [03-jet.md](03-jet.md) | DCS-style export | Covers; JetState.thrust made optional |
-| [04-sailboat.md](04-sailboat.md) | Sailaway-style | Covers; wind rides `wind.*` channels; sail geometry deferred |
-| [05-motorcycle.md](05-motorcycle.md) | GP Bikes-style | Covers cleanly; rider-as-second-object pattern |
-| [06-drone-mech.md](06-drone-mech.md) | FPV sim / MAVLink-style + legged mech | Covers; PropellerState extended + LegState.force fixed |
+| [01-race-car.md](01-race-car.md) | AC-style + iRacing-style car | Covers cleanly — per-wheel dynamics incl. extended data land in `WheelState` |
+| [02-prop-aircraft.md](02-prop-aircraft.md) | MSFS SimConnect + X-Plane datarefs | Covers — gear as wheels; `ctrl.*`/`wind.*`/`air.*` channel families |
+| [03-jet.md](03-jet.md) | DCS-style export | Covers — optional thrust; %RPM as its own channel |
+| [04-sailboat.md](04-sailboat.md) | Sailaway-style | Covers — multi-sail via drive points; wind rides `wind.*` channels |
+| [05-motorcycle.md](05-motorcycle.md) | GP Bikes-style | Covers cleanly — rider as second (`humanoid`) object |
+| [06-drone-mech.md](06-drone-mech.md) | FPV sim / MAVLink-style + legged mech | Covers — multi-propeller objects; optional per-leg force |
 
 Cross-domain results: every tested vehicle class maps to the two-layer
-model. All gaps found were optionality/scope issues, all resolved or
-deferred-safe; no new drive-point variants were required. Recurring sender
+model using schema fields, annex channels, and channel families — no
+dedicated drive-point variants beyond the ratified set. Recurring sender
 recipes: axis remap, Euler→quaternion, local-frame G→world conversion,
 geodetic→local tangent.

@@ -17,7 +17,7 @@
 | VELOCITY WORLD / `local_vx..` | `kinematics.velocity` | direct |
 | ACCELERATION WORLD | `kinematics.acceleration` | direct |
 | angular velocities (X-Plane R/P/Y rates) | derivable from orientation deltas (slerp derivative) | recipe |
-| ENG RPM / PROP RPM | `PropellerState.rpm` | direct |
+| ENG RPM / PROP RPM | `PropellerState.rpm` (pitch/thrust ride the optional `extended` variant when measured) | direct |
 | throttle lever % | `engine.throttle` | annex |
 | fuel flow / tank quantity | `fuel.rate` / `fuel.level` | annex |
 | mixture, oil temp/pressure | `mixture.*`, `engine.oilTemp`… | custom channel |
@@ -31,13 +31,14 @@
 | stall warning / G meter | `air.stall`, `air.gLoad` | custom channel |
 | avionics/FMS state | — | out of scope (instrument emulation) |
 
-## Gaps found
+## Notes
 
-| # | Problem | Resolution |
-|---|---|---|
-| — | Control surfaces have no schema home | `ctrl.*` convention channels — they are object-level quantities, channels are the honest home; `air.*`/`ctrl.*` flagged as annex candidates (≥2-game evidence exists) |
-| — | Per-tick wind vs discovery-static `environment` | `wind.*` convention channels — wind gusts are per-tick data; recorded in CHANNELS.md |
-| — | Propeller pitch/thrust often unmeasured (fixed-pitch props, estimated thrust) | `PropellerState` gained the `core`/`extended` union (rpm always; pitch+thrust when measured) |
+- Control surfaces are object-level quantities — channels are their honest
+  home; the `ctrl.*`, `wind.*`, `air.*` families in `CHANNELS.md` are annex
+  candidates (`ctrl.*`/`air.*` have ≥2-game evidence).
+- Per-tick wind rides `wind.*` channels — wind gusts are motion-frame data;
+  the discovery-static `environment` carries only slowly varying ambient
+  conditions (temperature/pressure/density).
 
 ## Verdict
 

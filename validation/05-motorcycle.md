@@ -19,10 +19,10 @@
 | tyre temp / pressure / wear / slip | `WheelExtended.tyre*` + `WheelState.slip` | direct |
 | rider hang-off / body position | second `humanoid` object's `position`/`orientation` | direct |
 
-## Gaps found
+## Notes
 
-None. Two wheels, one steered + one driven, exercises exactly the machinery
-the car test built.
+None — two wheels, one steered + one driven, exercises exactly the machinery
+the car test maps. Rider hang-off streams as a second (`humanoid`) object.
 
 ## Verdict
 

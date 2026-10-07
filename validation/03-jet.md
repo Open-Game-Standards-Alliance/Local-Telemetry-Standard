@@ -13,7 +13,7 @@
 | world/body velocity | `kinematics.velocity` | direct |
 | body-frame G (normal accel) | `kinematics.acceleration` (rotate via orientation) | recipe |
 | throttle position 0..1 | `JetState.throttle` | direct |
-| engine thrust | `JetState.thrust` (now optional — DCS exposes %RPM, not N) | direct |
+| engine thrust | `JetState.thrust` (optional — DCS-style games expose %RPM, not N; senders without measured thrust use the `noThrust` default) | direct |
 | engine RPM % | `jet.rpmPct` (% — deliberately NOT `engine.rpm`, whose ratified unit is rpm; the annex rule holds) | custom channel |
 | EGT / oil press/temp / afterburner | `engine.egt`, `engine.oilPressure`, `engine.afterburner` | custom channel |
 | internal fuel % / kg | `fuel.level` / `fuel.mass` | annex / custom |
@@ -24,14 +24,15 @@
 | nav/strobe/landing lights | `lights.*` (landing light ≈ `lights.headlights`) | annex/close |
 | weapons, countermeasures, radar | — | out of scope (combat systems) |
 
-## Gaps found
+## Notes
 
-| # | Problem | Resolution |
-|---|---|---|
-| — | DCS-style games expose %RPM, not thrust in Newtons; a plain `thrust` field would force sentinels | `JetState.thrust` made optional via `noThrust`/`thrust` union (idle ≈ 0 N is a real value) |
+- %RPM deliberately does **not** reuse `engine.rpm` (ratified unit is `rpm`) —
+  the annex unit rule holds; `jet.rpmPct` is a separate custom channel.
+- Idle ≈ 0 N is a real thrust value, which is why `thrust` is optional via
+  union rather than zero-sentinel.
 
 ## Verdict
 
 **Covers cleanly.** The jet case exercises the same conventions as 02 with
-zero new machinery; %RPM-vs-rpm is exactly what the annex unit rule exists
-for.
+zero additional machinery; %RPM-vs-rpm is exactly what the annex unit rule
+exists for.

@@ -20,14 +20,14 @@
 | VMG / depth / water temp | `vmg`, `water.depth`, `water.temperature` | custom channel |
 | hull immersion contact | `ContactMedium::water` (e.g. on a hull drive point) | direct |
 
-## Gaps found
+## Notes
 
-| # | Problem | Resolution |
-|---|---|---|
-| — | Sail geometry (area, hoist, type) not in the descriptor (`sail` variant is `Void`) | Deferred-safe: sail role rides the point name (`main`/`jib`/`spinnaker`); geometry fields can be added to a `SailSpec` in v1.x if physics receivers want sail forces |
-| — | Per-tick wind (the core sailing physics input) | Solved by the `wind.*` convention shared with aviation — same mechanism, both domains |
+- Sail role rides the drive-point name (`main` / `jib` / `spinnaker`); sail
+  geometry (area, hoist) is not modeled by the `sail` descriptor variant.
+- Wind rides `wind.*` channels consistently with aviation — same mechanism,
+  both domains.
 
 ## Verdict
 
 **Covers.** Multi-sail objects work via the drive-point list; wind rides
-channels consistently with aviation. Sail geometry deferred, not blocking.
+channels consistently with aviation.
