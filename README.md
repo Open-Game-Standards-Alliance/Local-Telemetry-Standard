@@ -22,6 +22,8 @@ clients (dashboards, motion rigs, haptics, loggers) join the same multicast
 group; no extra ports or proxying.
 
 [Implementation details for UDP data transport](implementation-udp.md).
+[MSFS 2024 sender reference](reference-msfs2024.md) — the SimVar set mapped
+onto LTS core schema plus sender-declared channels.
 
 ### Schema (v1, two-layer)
 

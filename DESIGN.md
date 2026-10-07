@@ -36,6 +36,21 @@ Coordinate system (normative):
   gives ~1 m precision at Earth magnitudes — display-grade, not navigation-
   grade; senders needing more split degrees from fractional degrees.
 
+## Non-goals
+
+- **Write-back / commands.** LTS is read-only game → software. This is a
+  founding stance, not an omission: a wire that can command the game is a
+  cheat vector for competitive titles, and commands need reliable, ordered,
+  consented delivery — properties lossy multicast telemetry must never carry.
+  Every engine already exposes a write API (SimConnect key events, X-Plane
+  dataref writes, engine input APIs); duplicating it adds risk, not value.
+  Ecosystem sources confirm the split: MSFS itself treats writing as a
+  separate mechanism (input key events / gauge RPN), not a property of the
+  telemetry surface, and per-variable writability is not uniformly marked.
+  If a command surface is ever demanded, it ships as a separate opt-in
+  profile on its own endpoint with its own handshake — never a flag on the
+  telemetry wire.
+
 ## 2. Core idea: two layers
 
 Telemetry data divides cleanly into two kinds with different change rates:
