@@ -23,6 +23,25 @@ with zero configuration. For everything else, fall back to per-game profiles.
 Discovery always carries the sender's name and unit, so this annex is a
 semantic convenience, never a dependency.
 
+## Naming conventions (families — not ratified entries)
+
+Some channel families recur across domains without single fixed semantics.
+Use these prefixes so receivers can group them; individual names remain
+free-form until a specific entry is ratified:
+
+- `ctrl.*` — control-surface / control-input deflections: `ctrl.aileron`,
+  `ctrl.elevator`, `ctrl.rudder` (−1..1), `ctrl.flaps`, `ctrl.spoilers`
+  (0..1), `gear.down` (boolean).
+- `wind.*` — per-tick wind: `wind.trueSpeed` / `wind.apparentSpeed` (m/s),
+  `wind.trueDirection` / `wind.apparentAngle` (rad, world/object frame).
+  Wind changes per gust, so it rides motion-frame channels — never the
+  discovery-static `environment`.
+- `air.*` — air data: `air.trueAirspeed`, `air.indicatedAirspeed` (m/s),
+  `air.aoa` (rad), `air.mach`.
+
+These families are annex candidates once naming stabilizes across ≥2 games
+(`air.*` and `ctrl.*` already qualify on MSFS/X-Plane/DCS evidence).
+
 ## Ratification rules
 
 1. The concept must exist in at least **two shipping games** (or clear

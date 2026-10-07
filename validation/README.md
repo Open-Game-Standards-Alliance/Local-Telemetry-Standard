@@ -22,3 +22,14 @@ Results so far:
 | Test | Domains | Verdict |
 |---|---|---|
 | [01-race-car.md](01-race-car.md) | AC-style + iRacing-style car | Covers cleanly; G1–G3 found and fixed in v1 |
+| [02-prop-aircraft.md](02-prop-aircraft.md) | MSFS SimConnect + X-Plane datarefs | Covers; `ctrl.*`/`wind.*`/`air.*` conventions; PropellerState optionality fixed |
+| [03-jet.md](03-jet.md) | DCS-style export | Covers; JetState.thrust made optional |
+| [04-sailboat.md](04-sailboat.md) | Sailaway-style | Covers; wind rides `wind.*` channels; sail geometry deferred |
+| [05-motorcycle.md](05-motorcycle.md) | GP Bikes-style | Covers cleanly; rider-as-second-object pattern |
+| [06-drone-mech.md](06-drone-mech.md) | FPV sim / MAVLink-style + legged mech | Covers; PropellerState extended + LegState.force fixed |
+
+Cross-domain results: every tested vehicle class maps to the two-layer
+model. All gaps found were optionality/scope issues, all resolved or
+deferred-safe; no new drive-point variants were required. Recurring sender
+recipes: axis remap, Euler→quaternion, local-frame G→world conversion,
+geodetic→local tangent.

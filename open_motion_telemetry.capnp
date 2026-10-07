@@ -227,13 +227,23 @@ struct WheelExtended {
 
 struct PropellerState {
   rpm @0 :Float32;
-  pitch @1 :Float32;               # radians
-  thrust @2 :Float32;              # N
+  union {
+    core @1 :Void;                  # default: rpm only
+    extended @2 :PropellerExtended; # pitch/thrust when measured
+  }
+}
+
+struct PropellerExtended {
+  pitch @0 :Float32;               # radians (variable-pitch props)
+  thrust @1 :Float32;              # N, measured or well-estimated
 }
 
 struct JetState {
   throttle @0 :Float32;            # 0..1
-  thrust @1 :Float32;              # N
+  union {
+    noThrust @1 :Void;             # default: not measured
+    thrust @2 :Float32;            # N
+  }
 }
 
 struct SailState {
@@ -244,6 +254,10 @@ struct SailState {
 struct LegState {
   contact @0 :Bool;
   phase @1 :Float32;               # gait phase 0..1
+  union {
+    noForce @2 :Void;              # default: not available
+    force @3 :Vector3;             # world space, N (mirrors GenericState)
+  }
 }
 
 struct GenericState {
