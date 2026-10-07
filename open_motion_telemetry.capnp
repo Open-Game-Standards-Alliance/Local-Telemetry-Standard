@@ -273,6 +273,8 @@ struct WheelState {
 struct WheelExtended {
   steerAngle @0 :Float32;          # radians; positive = left (ISO convention)
   loadForce @1 :Float32;           # N along suspension axis, measured (incl. damping)
+  damperVelocity @5 :Float32;      # m/s compression rate (iRacing shockVel, Dirt 4
+                                   # suspension_velocity — ≥2-game evidence)
   tyrePressure @2 :Float32;        # Pa
   tyreTemp @3 :Float32;            # degC, carcass/average (zone temps → channels)
   tyreWear @4 :Float32;            # 0..1 fraction remaining (1 = new)

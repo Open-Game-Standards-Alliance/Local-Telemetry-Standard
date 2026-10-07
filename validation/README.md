@@ -34,6 +34,7 @@ Results so far:
 | [11-spacemonkey.md](11-spacemonkey.md) | SpaceMonkey middleware (~24 games, injected providers) | Covers — 5th source class; Dirt-4 de-facto-carrier finding; fwd/up precedent; **naming risk: OpenMotionAPI collision** |
 | [12-flypt-cor.md](12-flypt-cor.md) | FlyPT Mover documentation (center of rotation) | Requirement adopted — `referencePoint` + `namedPoints` close the silent reference-point contract; correction stays consumer-side |
 | [13-extensibility.md](13-extensibility.md) | Design review — custom datapoints at two cadences | Supported — streamed channels (motion) + session channels (`values` in discovery); late joiners get whole state from discovery |
+| [14-iracing.md](14-iracing.md) | iRacing SDK official documentation (~250 vars + session YAML) | Covers + adopts `damperVelocity`; both dynamics reps native; session `values` exercised; multi-car grid guidance |
 
 Cross-domain results: every tested vehicle class maps to the two-layer
 model using schema fields, annex channels, and channel families — no
