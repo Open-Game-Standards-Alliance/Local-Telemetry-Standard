@@ -6,6 +6,15 @@ It defines a logical minimal set of required telemetry to meet the standard, whi
 
 It defines the network protocols and provides tools to aid implementation in multiple game engines.
 
+## Origin and stewardship
+
+The Local Telemetry Standard was started and is driven by **Brian Gilbert**
+([@BrianGilbert](https://github.com/BrianGilbert)) as an open standard for
+the game development community to adopt. Design decisions and validation
+evidence are developed in the open in this repository, and the standard is
+free for anyone to implement. If it is useful to you, consider
+[sponsoring its development](https://github.com/sponsors/BrianGilbert).
+
 ## Implementation
 
 ### Data format
