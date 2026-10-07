@@ -14,7 +14,7 @@
 #   - Unknown-field skipping in both directions: receivers ignore unknown fields and
 #     unknown union variants, so v1.x can add without breaking deployed decoders.
 
-@0x5fa84c118a0c2b03;
+@0xea4c1f1039af078e;
 
 # ---------------------------------------------------------------------------
 # Shared
@@ -97,16 +97,16 @@ struct ObjectDescriptor {
   name @0 :Text;                   # stable per session; matches MotionObject.name
   type @1 :ObjectType;             # coarse class; ratifiable enum
   location @2 :Text;               # e.g. track/place name (display-only)
-  typeLabel @5 :Text;              # optional display label, e.g. "Formula 1 2024"
-  primary @6 :Bool;                # reference object for motion rigs / compensation;
+  typeLabel @3 :Text;              # optional display label, e.g. "Formula 1 2024"
+  primary @4 :Bool;                # reference object for motion rigs / compensation;
                                    # exactly one SHOULD be set per discovery frame
-  referencePoint @7 :NamedPoint;   # where reported pose/dynamics are measured;
+  referencePoint @5 :NamedPoint;   # where reported pose/dynamics are measured;
                                    # default (name "", zero) = the object-local
                                    # frame origin (typically the CG)
-  namedPoints @8 :List(NamedPoint);# other named vehicle-local points (cg, pilot,
+  namedPoints @6 :List(NamedPoint);# other named vehicle-local points (cg, pilot,
                                    # driver eye, seats...) for consumer corrections
-  drivePoints @3 :List(DrivePointDescriptor);
-  channels @4 :List(ChannelDescriptor);
+  drivePoints @7 :List(DrivePointDescriptor);
+  channels @8 :List(ChannelDescriptor);
   values @9 :List(ChannelValue);    # current values of session-scoped channels
                                    # (rarely-changing datapoints: setup, session
                                    # type, stage name, weather preset). Discovery
@@ -139,12 +139,12 @@ struct ChannelDescriptor {
   name @1 :Text;                   # stable identifier, e.g. "engine.rpm"
   unit @2 :Text;                   # e.g. "rpm", "m/s", "bar", "" = unitless
   union {
-    # Struct fields are inline (not nullable); the discriminant carries
-    # range optionality.
+    # Range is optional: inline struct fields are not nullable, so the
+    # discriminant carries the optionality.
     noRange @3 :Void;              # default: unbounded / unknown
-    range @5 :Range;               # declared operating range
+    range @4 :Range;               # declared operating range
   }
-  description @4 :Text;            # human-readable, shown by dash tools
+  description @5 :Text;            # human-readable, shown by dash tools
 }
 
 struct SuspensionSpec {
@@ -165,12 +165,12 @@ struct DrivePointDescriptor {
   union {
     # Static, type-specific geometry. Extensible: add variants in v1.x —
     # old receivers skip unknown variants (unknown-union discriminant).
-    wheel @4 :WheelSpec;
-    propeller @5 :PropellerSpec;
-    jet @6 :Void;
-    sail @7 :Void;
-    leg @8 :Void;
-    generic @9 :GenericSpec;         # unspecified drive; state carried by GenericState
+    wheel @3 :WheelSpec;
+    propeller @4 :PropellerSpec;
+    jet @5 :Void;
+    sail @6 :Void;
+    leg @7 :Void;
+    generic @8 :GenericSpec;         # unspecified drive; state carried by GenericState
   }
 }
 
@@ -220,11 +220,11 @@ struct MotionObject {
   union {
     noDynamics @3 :Void;           # default: not provided — derive from pose
     kinematics @4 :Kinematics;     # velocity + acceleration, world space
-    bodyDynamics @7 :BodyDynamics; # specific force + angular rates, body frame
+    bodyDynamics @5 :BodyDynamics; # specific force + angular rates, body frame
   }
 
-  drivePoints @5 :List(DrivePoint);   # only points with state this tick
-  channels @6 :List(ChannelValue);    # only channels that changed / are streamed
+  drivePoints @6 :List(DrivePoint);   # only points with state this tick
+  channels @7 :List(ChannelValue);    # only channels that changed / are streamed
 }
 
 struct Kinematics {
@@ -273,11 +273,11 @@ struct WheelState {
 struct WheelExtended {
   steerAngle @0 :Float32;          # radians; positive = left (ISO convention)
   loadForce @1 :Float32;           # N along suspension axis, measured (incl. damping)
-  damperVelocity @5 :Float32;      # m/s compression rate (iRacing shockVel, Dirt 4
+  damperVelocity @2 :Float32;      # m/s compression rate (iRacing shockVel, Dirt 4
                                    # suspension_velocity — ≥2-game evidence)
-  tyrePressure @2 :Float32;        # Pa
-  tyreTemp @3 :Float32;            # degC, carcass/average (zone temps → channels)
-  tyreWear @4 :Float32;            # 0..1 fraction remaining (1 = new)
+  tyrePressure @3 :Float32;        # Pa
+  tyreTemp @4 :Float32;            # degC, carcass/average (zone temps → channels)
+  tyreWear @5 :Float32;            # 0..1 fraction remaining (1 = new)
 }
 
 struct PropellerState {
