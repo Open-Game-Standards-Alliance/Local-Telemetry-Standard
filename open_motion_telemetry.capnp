@@ -134,7 +134,7 @@ struct DrivePointDescriptor {
     jet @6 :Void;
     sail @7 :Void;
     leg @8 :Void;
-    generic @9 :Void;              # unspecified; state carried by GenericState
+    generic @9 :GenericSpec;         # unspecified drive; state carried by GenericState
   }
 }
 
@@ -147,6 +147,10 @@ struct WheelSpec {
 struct PropellerSpec {
   diameter @0 :Float32;            # meters
   blades @1 :UInt16;
+}
+
+struct GenericSpec {
+  ratedForce @0 :Float32;          # rated force magnitude, N; 0 = unspecified
 }
 
 # ---------------------------------------------------------------------------
@@ -165,14 +169,22 @@ struct MotionObject {
   position @1 :Vector3;            # world space, meters, left-handed, Z-forward, Y-up
   orientation @2 :Quaternion;      # unit quaternion: LTS world -> object axes
 
-  # Derived kinematics — optional (null pointer = not provided). Receivers that
-  # need them derive from pose deltas when absent; senders that already compute
-  # them cheaply may include them.
-  velocity @4 :Vector3;            # m/s, world space
-  acceleration @5 :Vector3;        # m/s^2, world space
+  # Derived kinematics — optional, both or neither. Cap'n Proto struct fields
+  # are inline (not nullable pointers), so absence is expressed by the union
+  # discriminant: the default variant means "not provided — receivers derive
+  # from pose deltas".
+  union {
+    derivedKinematics @3 :Void;    # default: not provided
+    kinematics @4 :Kinematics;     # velocity + acceleration, world space
+  }
 
-  drivePoints @6 :List(DrivePoint);   # only points with state this tick
-  channels @7 :List(ChannelValue);    # only channels that changed / are streamed
+  drivePoints @5 :List(DrivePoint);   # only points with state this tick
+  channels @6 :List(ChannelValue);    # only channels that changed / are streamed
+}
+
+struct Kinematics {
+  velocity @0 :Vector3;            # m/s, world space
+  acceleration @1 :Vector3;        # m/s^2, world space
 }
 
 struct DrivePoint {
@@ -219,9 +231,14 @@ struct LegState {
 }
 
 struct GenericState {
-  # Escape hatch for drive-point types without a dedicated variant: named
-  # channels on the object carry the actual values.
+  # Escape hatch for drive-point types without a dedicated variant. Multi-instance
+  # by design (four hover fans = four generic drive points): physical quantities
+  # are per-point fields; game-flavored quantities ride object channels.
   engaged @0 :Bool;
+  union {
+    noForce @1 :Void;              # default: force not available
+    force @2 :Vector3;             # world space, N
+  }
 }
 
 struct ChannelValue {

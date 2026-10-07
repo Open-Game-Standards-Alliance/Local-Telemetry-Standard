@@ -56,9 +56,9 @@ discovery re-send.
 
 - `timestamp` — seconds since session start.
 - `objects` — one `MotionObject` per descriptor: pose core (position,
-  orientation quaternion — the required minimal set), optional
-  velocity/acceleration, and per-tick drive-point state and channel values,
-  keyed by the discovery ids.
+  orientation quaternion — the required minimal set), optional kinematics
+  (velocity + acceleration, both or neither), and per-tick drive-point state
+  and channel values, keyed by the discovery ids.
 
 Drive points are typed on both sides: the descriptor carries static geometry
 (suspension travel/stiffness, wheel radius/driven/steered, propeller
@@ -96,8 +96,11 @@ breaking deployed receivers (see §7).
   comment, not banned — dashboards sometimes need label changes.
 - **Optional derived kinematics.** Receiver-side derivation (velocity,
   acceleration computed by the client library) is the default; senders that
-  already have accurate values may include them. Nullable pointer fields express
-  "absent" honestly — no sentinel floats.
+  already have accurate values may include them — both or neither, as one
+  `Kinematics` value. Absence is expressed by a union discriminant, not a
+  sentinel: Cap'n Proto struct fields are inline (not nullable pointers),
+  so the default `derivedKinematics` variant means "not provided". Zero
+  vectors stay legitimate values, never "unknown".
 - **Discovery re-send on change.** Vehicle swap, channel set change, or medium
   change (air → water) re-sends the whole `DiscoveryFrame`. Idempotent by design.
 - **Ranges in descriptors, not per frame.** Min/max per descriptor restores
@@ -147,6 +150,15 @@ breaking deployed receivers (see §7).
   multicast is trivial to ship in engine plugins (see §7 and
   `implementation-udp.md`); Aeron remains an optional backend for extreme
   rates, strict ordering under load, or back-pressure across many subscribers.
+- **`GenericState` carries force.** Generic drive points are multi-instance
+  by design (four hover fans = four points), and per-point physical values
+  cannot ride object-level channels without stringly-typed linkage. Force is
+  the universal mechanical quantity (wheel torque and propeller thrust both
+  reduce to it), so `GenericState` carries optional world-space `force :Vector3`
+  (N), and the descriptor's `GenericSpec` carries `ratedForce` for
+  normalization. Dedicated states keep their own idioms (torque, thrust) —
+  a uniform force field can be added in v1.x if force-based cueing software
+  wants it.
 
 ## 6. Wire sizes
 
@@ -176,7 +188,3 @@ configurable. See `implementation-udp.md`.
 - The Cap'n Proto schema is the single source of truth. If a JSON mirror is
   ever needed for tooling (e.g. web dashboards), it must be generated from
   the capnp — never hand-maintained.
-
-## 9. Open questions
-
-1. Whether `GenericState` should grow a small fixed payload (force vector).
