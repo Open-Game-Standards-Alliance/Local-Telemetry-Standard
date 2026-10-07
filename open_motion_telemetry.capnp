@@ -170,13 +170,14 @@ struct MotionObject {
   position @1 :Vector3;            # world space, meters, left-handed, Z-forward, Y-up
   orientation @2 :Quaternion;      # unit quaternion: LTS world -> object axes
 
-  # Derived kinematics — optional, both or neither. Cap'n Proto struct fields
-  # are inline (not nullable pointers), so absence is expressed by the union
-  # discriminant: the default variant means "not provided — receivers derive
-  # from pose deltas".
+  # Dynamics — optional; exactly one representation, whichever the sender
+  # measures natively. Receivers convert between them using orientation.
+  # Cap'n Proto struct fields are inline (not nullable), so absence is the
+  # union's default variant.
   union {
-    derivedKinematics @3 :Void;    # default: not provided
+    noDynamics @3 :Void;           # default: not provided — derive from pose
     kinematics @4 :Kinematics;     # velocity + acceleration, world space
+    bodyDynamics @7 :BodyDynamics; # specific force + angular rates, body frame
   }
 
   drivePoints @5 :List(DrivePoint);   # only points with state this tick
@@ -186,6 +187,15 @@ struct MotionObject {
 struct Kinematics {
   velocity @0 :Vector3;            # m/s, world space
   acceleration @1 :Vector3;        # m/s^2, world space
+}
+
+struct BodyDynamics {
+  # Native representation of accelerometer-class sources (e.g. community
+  # memory offsets) and the direct input of motion-cueing washout filters.
+  # Body axes: LTS world frame rotated by orientation — x +right (sway),
+  # y +up (heave), z +forward (surge).
+  specificForce @0 :Vector3;      # m/s^2, accelerometer-style (gravity reaction included)
+  angularVelocity @1 :Vector3;    # rad/s: x +nose-up pitch, y +nose-right yaw, z +roll right-down
 }
 
 struct DrivePoint {

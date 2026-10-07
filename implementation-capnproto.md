@@ -140,9 +140,10 @@ kj::Array<capnp::word> buildMotion(double timestampSeconds) {
     car.initPosition().setX(1.5f);  // …setY/setZ similarly
     auto q = car.initOrientation(); // unit quaternion, LTS world -> object axes
     q.setZ(0.0f); q.setW(1.0f);     // identity; …setX/setY for actual rotation
-    // kinematics is optional — omit it and receivers derive velocity/
-    // acceleration from pose deltas (send with obj.initKinematics();
-    // both values, or neither)
+    // dynamics is optional — omit it and receivers derive velocity/
+    // acceleration from pose deltas (send obj.initKinematics() for world
+    // velocity+acceleration, or obj.initBodyDynamics() for accelerometer-
+    // style specific force + angular rates — whichever you measure natively)
 
     // Drive-point state: only points with state this tick
     auto points = car.initDrivePoints(4);

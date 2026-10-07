@@ -27,6 +27,7 @@ Results so far:
 | [04-sailboat.md](04-sailboat.md) | Sailaway-style | Covers — multi-sail via drive points; wind rides `wind.*` channels |
 | [05-motorcycle.md](05-motorcycle.md) | GP Bikes-style | Covers cleanly — rider as second (`humanoid`) object |
 | [06-drone-mech.md](06-drone-mech.md) | FPV sim / MAVLink-style + legged mech | Covers — multi-propeller objects; optional per-leg force |
+| [07-elite-spacecraft.md](07-elite-spacecraft.md) | Elite Dangerous community memory offsets | Covers — `bodyDynamics` (accelerometer-class source); ship↔SRV primary switching; low-rate fused pose |
 
 Cross-domain results: every tested vehicle class maps to the two-layer
 model using schema fields, annex channels, and channel families — no

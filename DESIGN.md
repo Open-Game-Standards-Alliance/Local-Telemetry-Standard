@@ -56,8 +56,8 @@ discovery re-send.
 
 - `timestamp` — seconds since session start.
 - `objects` — one `MotionObject` per descriptor: pose core (position,
-  orientation quaternion — the required minimal set), optional kinematics
-  (velocity + acceleration, both or neither), and per-tick drive-point state
+  orientation quaternion — the required minimal set), optional dynamics
+  (world `kinematics` or body `bodyDynamics`), and per-tick drive-point state
   and channel values, keyed by the discovery ids.
 
 Drive points are typed on both sides: the descriptor carries static geometry
@@ -94,13 +94,14 @@ breaking deployed receivers (see §7).
 - **Typed channel values.** Booleans (headlights, wipers) and text (mode labels)
   are first-class, not abused floats. Text at high rate is discouraged by
   comment, not banned — dashboards sometimes need label changes.
-- **Optional derived kinematics.** Receiver-side derivation (velocity,
-  acceleration computed by the client library) is the default; senders that
-  already have accurate values may include them — both or neither, as one
-  `Kinematics` value. Absence is expressed by a union discriminant, not a
-  sentinel: Cap'n Proto struct fields are inline (not nullable pointers),
-  so the default `derivedKinematics` variant means "not provided". Zero
-  vectors stay legitimate values, never "unknown".
+- **Optional dynamics, one native representation.** Senders provide
+  whichever dynamics representation they measure natively: world-space
+  `kinematics` (velocity + acceleration) or body-frame `bodyDynamics`
+  (specific force + angular rates — the accelerometer-class source pattern
+  and the direct input of washout cueing). Receivers convert between the
+  two using orientation. Absence is the union's `Void` default (Cap'n Proto
+  struct fields are inline, not nullable) — no sentinels; zeros are real
+  readings.
 - **Discovery re-send on change.** Vehicle swap, channel set change, or medium
   change (air → water) re-sends the whole `DiscoveryFrame`. Idempotent by design.
 - **Ranges in descriptors, not per frame.** Min/max per descriptor restores
