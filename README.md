@@ -24,6 +24,8 @@ group; no extra ports or proxying.
 [Implementation details for UDP data transport](implementation-udp.md).
 [MSFS 2024 sender reference](reference-msfs2024.md) — the SimVar set mapped
 onto LTS core schema plus sender-declared channels.
+[iRacing sender reference](reference-iracing.md) — the irsdk set (telemetry
++ session YAML) mapped the same way, with multi-car grid guidance.
 
 ### Schema (v1, two-layer)
 
