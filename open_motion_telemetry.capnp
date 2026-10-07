@@ -1,65 +1,208 @@
-@0xafeb1234567890ab;  # Unique ID for this schema
+# Open Game Standards Alliance — Local Telemetry Standard, schema v1 (two-layer)
+#
+# Layers (see DESIGN.md):
+#   DiscoveryFrame — low rate: once per session, re-sent on change. Self-describing
+#                    metadata: environment, objects, drive points, channel descriptors.
+#   MotionFrame    — high rate (~60 Hz): bare kinematics + state values, keyed by the
+#                    ids declared in DiscoveryFrame.
+#
+# Principles:
+#   - Static metadata lives in discovery; per-frame samples stay bare (no repeated
+#     units/ranges/enums on the wire).
+#   - Domain generality: drive points are a union (wheel/propeller/jet/sail/leg/generic);
+#     channels are typed key-values declared up front — any game, any domain.
+#   - Unknown-field skipping in both directions: receivers ignore unknown fields and
+#     unknown union variants, so v1.x can add without breaking deployed decoders.
 
-# Root struct representing the full telemetry packet
-struct MotionTelemetry {
-  gameName       @0 :Text;           # Name of the game
-  timestamp      @1 :Float64;        # Seconds since session start (double precision)
-  motionObject   @2 :MotionObject;   # Core motion data
-}
+@0x5fa84c118a0c2b03;
 
-# Represents the motionObject structure
-struct MotionObject {
-  objectLocation @0 :Text;           # Location of the object (e.g., "car")
-  objectName     @1 :Text;           # Name of the object
-  objectType     @2 :Text;           # Type of the object (e.g., "vehicle")
+# ---------------------------------------------------------------------------
+# Shared
+# ---------------------------------------------------------------------------
 
-  # Position in world space (meters, left-handed, Z-forward)
-  positionX      @3 :Float32;
-  positionY      @4 :Float32;
-  positionZ      @5 :Float32;
-
-  # Orientation in world space (left-handed, Z-forward)
-  forward        @6 :Vector3;        # Forward vector (Z-forward)
-  up             @7 :Vector3;        # Up vector (Y-up)
-
-  # Array of drive points
-  drivePoints    @8 :List(DrivePoint);
-
-  # Aerodynamics data
-  aerodynamics   @9 :Aerodynamics;
-
-  # Feedback items (array of key-value pairs)
-  feedbackItem   @10 :List(FeedbackItem);
-}
-
-# Represents a 3D vector
 struct Vector3 {
   x @0 :Float32;
   y @1 :Float32;
   z @2 :Float32;
 }
 
-# Represents a single drive point
+struct Range {
+  min @0 :Float64;
+  max @1 :Float64;
+}
+
+enum ContactMedium {
+  air         @0;
+  asphalt     @1;
+  dirt        @2;
+  grass       @3;
+  gravel      @4;
+  rumbleStrip @5;
+  water       @6;
+  snow        @7;
+  ice         @8;
+  other       @9;
+}
+
+struct Environment {
+  # Ambient conditions of the simulation medium. Sent in discovery; may be
+  # re-sent on change (e.g. entering water). Units in comments.
+  airDensity @0 :Float32;   # kg/m^3
+  temperature @1 :Float32;  # °C
+  pressure @2 :Float32;     # bar
+  gravity @3 :Float32;      # m/s^2
+  medium @4 :ContactMedium; # dominant surrounding medium
+}
+
+# ---------------------------------------------------------------------------
+# Discovery frame (low rate)
+# ---------------------------------------------------------------------------
+
+struct DiscoveryFrame {
+  schemaVersion @0 :UInt16;        # 1 for this schema
+  gameName @1 :Text;
+  sessionStartUnixUs @2 :Int64;    # wall-clock anchor; frame timestamps are relative
+  environment @3 :Environment;
+  objects @4 :List(ObjectDescriptor);
+
+  # Re-send the whole frame when any descriptor changes (vehicle swap, channel
+  # set change). Receivers key purely by ids, so re-sends are non-breaking.
+}
+
+struct ObjectDescriptor {
+  name @0 :Text;                   # stable per session; matches MotionObject.name
+  type @1 :Text;                   # e.g. "vehicle", "aircraft", "boat" (enum to ratify)
+  location @2 :Text;               # e.g. track/place name
+  drivePoints @3 :List(DrivePointDescriptor);
+  channels @4 :List(ChannelDescriptor);
+}
+
+struct ChannelDescriptor {
+  # Declares one generic telemetry channel. Ids are sender-assigned, unique
+  # within the object. This is the extension mechanism of the standard: any
+  # game can expose any datapoint as a well-documented, typed channel.
+  id @0 :UInt16;
+  name @1 :Text;                   # stable identifier, e.g. "engine.rpm"
+  unit @2 :Text;                   # e.g. "rpm", "m/s", "bar", "" = unitless
+  range @3 :Range;                 # optional (null when unbounded)
+  description @4 :Text;            # human-readable, shown by dash tools
+}
+
+struct SuspensionSpec {
+  # Static suspension geometry per drive point.
+  travel @0 :Range;                # compression travel, meters
+  stiffness @1 :Float32;           # N/m for unit displacement
+}
+
+struct DrivePointDescriptor {
+  id @0 :UInt16;
+  name @1 :Text;                   # e.g. "wheel_front_left"
+  cogOffset @2 :Vector3;           # offset from object center of gravity, meters
+  suspension @3 :SuspensionSpec;   # optional (null: not applicable)
+  union {
+    # Static, type-specific geometry. Extensible: add variants in v1.x —
+    # old receivers skip unknown variants (unknown-union discriminant).
+    wheel @4 :WheelSpec;
+    propeller @5 :PropellerSpec;
+    jet @6 :Void;
+    sail @7 :Void;
+    leg @8 :Void;
+    generic @9 :Void;              # unspecified; state carried by GenericState
+  }
+}
+
+struct WheelSpec {
+  radius @0 :Float32;              # meters
+  driven @1 :Bool;                 # power delivered through this wheel
+  steered @2 :Bool;
+}
+
+struct PropellerSpec {
+  diameter @0 :Float32;            # meters
+  blades @1 :UInt16;
+}
+
+# ---------------------------------------------------------------------------
+# Motion frame (high rate)
+# ---------------------------------------------------------------------------
+
+struct MotionFrame {
+  timestamp @0 :Float64;           # seconds since session start (anchor in discovery)
+  objects @1 :List(MotionObject);  # primary object first
+}
+
+struct MotionObject {
+  name @0 :Text;                   # matches ObjectDescriptor.name
+
+  # Core pose — the LTS minimal set.
+  position @1 :Vector3;            # world space, meters, left-handed, Z-forward, Y-up
+  forward @2 :Vector3;             # unit vector
+  up @3 :Vector3;                  # unit vector
+
+  # Derived kinematics — optional (null pointer = not provided). Receivers that
+  # need them derive from pose deltas when absent; senders that already compute
+  # them cheaply may include them.
+  velocity @4 :Vector3;            # m/s, world space
+  acceleration @5 :Vector3;        # m/s^2, world space
+
+  drivePoints @6 :List(DrivePoint);   # only points with state this tick
+  channels @7 :List(ChannelValue);    # only channels that changed / are streamed
+}
+
 struct DrivePoint {
-  name          @0 :Text;            # Name of the drive point (e.g., "wheel_front_left")
-  type          @1 :Text;            # Type of the drive point
-  cogOffsetX    @2 :Float32;         # Center of gravity offset X (meters)
-  cogOffsetY    @3 :Float32;         # Center of gravity offset Y (meters)
-  cogOffsetZ    @4 :Float32;         # Center of gravity offset Z (meters)
-  rpm           @5 :Float32;         # Revolutions per minute
-  torque        @6 :Float32;         # Torque in Newton-meters
-  brakePressure @7 :Float32;         # Brake pressure (assumed Pascals or similar)
+  id @0 :UInt16;                   # matches DrivePointDescriptor.id
+  union {
+    # Dynamic state per drive-point type. Variants mirror the descriptor union.
+    wheel @1 :WheelState;
+    propeller @2 :PropellerState;
+    jet @3 :JetState;
+    sail @4 :SailState;
+    leg @5 :LegState;
+    generic @6 :GenericState;
+  }
 }
 
-# Represents aerodynamics data
-struct Aerodynamics {
-  liftCoefficient @0 :Float32;       # Lift coefficient
-  dragCoefficient @1 :Float32;       # Drag coefficient
-  yawCoefficient  @2 :Float32;       # Yaw coefficient
+struct WheelState {
+  rpm @0 :Float32;
+  torque @1 :Float32;              # Nm
+  brakePressure @2 :Float32;       # Pa
+  slip @3 :Float32;                # slip ratio, 0 = rolling
+  compression @4 :Float32;         # current suspension compression, meters
+  contact @5 :ContactMedium;
 }
 
-# Represents a feedback item (key-value pair)
-struct FeedbackItem {
-  name           @0 :Text;           # Name of the feedback (e.g., "altitude")
-  value          @1 :Float32;        # Value of the feedback
+struct PropellerState {
+  rpm @0 :Float32;
+  pitch @1 :Float32;               # radians
+  thrust @2 :Float32;              # N
+}
+
+struct JetState {
+  throttle @0 :Float32;            # 0..1
+  thrust @1 :Float32;              # N
+}
+
+struct SailState {
+  sheet @0 :Float32;               # 0..1
+  angle @1 :Float32;               # radians relative to object
+}
+
+struct LegState {
+  contact @0 :Bool;
+  phase @1 :Float32;               # gait phase 0..1
+}
+
+struct GenericState {
+  # Escape hatch for drive-point types without a dedicated variant: named
+  # channels on the object carry the actual values.
+  engaged @0 :Bool;
+}
+
+struct ChannelValue {
+  id @0 :UInt16;                   # matches ChannelDescriptor.id
+  union {
+    number @1 :Float32;
+    boolean @2 :Bool;
+    text @3 :Text;                 # rare (labels, mode names); avoid per-frame
+  }
 }

@@ -16,9 +16,21 @@ We propose using Cap'n Proto as the data format. Cap’n Proto is a zero-copy, b
 
 ### Data Transport
 
-We propose using Aeron as the data transport. Aeron is a high-performance messaging library that provides low-latency, reliable communication over UDP. It is designed to work well in environments with high message rates and low latency requirements, such as gaming. It allows for multicasting, which can be useful if multiple clients need to receive the same telemetry data.
+The data transport is plain UDP multicast — one socket, no broker, no driver
+process — with an 8-byte envelope identifying the frame type. Multiple local
+clients (dashboards, motion rigs, haptics, loggers) join the same multicast
+group; no extra ports or proxying.
 
-[Implementation details for Aeron data transport](implementation-aeron.md).
+[Implementation details for UDP data transport](implementation-udp.md).
+
+### Schema (v1, two-layer)
+
+The schema separates static metadata from per-frame samples: a low-rate
+`DiscoveryFrame` (environment, drive-point descriptors, self-describing channel
+declarations with type/unit/range — the standard's extension mechanism) and a
+high-rate `MotionFrame` (the minimal pose core plus typed values keyed by
+discovery ids). See [DESIGN.md](DESIGN.md) and
+[`open_motion_telemetry.capnp`](open_motion_telemetry.capnp).
 
 ## Scope
 
