@@ -48,7 +48,9 @@ discovery re-send.
 - `environment` — ambient conditions of the simulation medium: air density,
   temperature, pressure, gravity, and the dominant medium (`ContactMedium`).
 - `objects` — one `ObjectDescriptor` per streamed object (primary first):
-  identity (name/type/location), `DrivePointDescriptor`s, `ChannelDescriptor`s.
+  identity (`name`, `type` — a ratified `ObjectType` enum plus optional
+  `typeLabel` for display — and `location`), `DrivePointDescriptor`s,
+  `ChannelDescriptor`s.
 
 `MotionFrame` carries the samples:
 
@@ -110,6 +112,16 @@ breaking deployed receivers (see §7).
   interpolation across packet loss (`slerp`/`nlerp`) is the boring standard
   path. Decided pre-release, so no representation duality exists: no
   optional vector pair, no receiver-side basis conversion.
+- **`ObjectType` is a ratified enum, not free text.** Receivers (notably
+  motion-control software selecting a cueing preset) can switch on it
+  reliably; free text (`"Car"` vs `"car"` vs `"F1"`) forces receiver-side
+  guessing. The set stays coarse — vehicle / aircraft / watercraft /
+  spacecraft / humanoid / camera / other — because fine-grained domain
+  hints already live in the drive-point union. Unknown enumerants survive
+  round-trips (`UInt16` on the wire), so new values can be ratified in v1.x
+  without breaking deployed receivers. `typeLabel` (optional text) carries
+  display flavor; `location` stays free text — pure display data nothing
+  switches on.
 - **Plain UDP over a messaging library.** At 60–120 Hz with sub-500-byte
   packets, transport latency is a few hundred microseconds at most — noise
   next to the physics tick, cueing filters, and actuator response. A high-
@@ -150,7 +162,8 @@ configurable. See `implementation-udp.md`.
 
 ## 9. Open questions
 
-1. `objectType` as a ratified enum (aircraft/atv/boat/...) vs free text.
-2. Channel-name namespace: informal (`engine.rpm`) vs a registry to prevent
+1. Channel-name namespace: informal (`engine.rpm`) vs a registry to prevent
    receiver-side guessing.
-3. Whether `GenericState` should grow a small fixed payload (force vector).
+2. Whether `GenericState` should grow a small fixed payload (force vector).
+3. Whether `ObjectDescriptor` should carry an explicit `primary :Bool` flag
+   (today the primary object is only signaled by list ordering).

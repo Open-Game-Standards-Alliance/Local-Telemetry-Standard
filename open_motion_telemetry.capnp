@@ -41,6 +41,20 @@ struct Range {
   max @1 :Float64;
 }
 
+enum ObjectType {
+  # Coarse classification for cueing-preset selection and UI. Fine-grained
+  # domain hints live in the drive-point union (wheel/propeller/sail/leg).
+  # Unknown enumerants survive round-trips (UInt16 on the wire), so new
+  # values may be ratified in v1.x without breaking deployed receivers.
+  vehicle    @0;   # ground: car, kart, tank
+  aircraft   @1;   # plane, helicopter, drone
+  watercraft @2;   # boat, ship, submarine
+  spacecraft @3;
+  humanoid   @4;   # on-foot player or NPC
+  camera     @5;   # spectator / free camera
+  other      @6;   # escape hatch — never force a wrong class
+}
+
 enum ContactMedium {
   air         @0;
   asphalt     @1;
@@ -81,8 +95,9 @@ struct DiscoveryFrame {
 
 struct ObjectDescriptor {
   name @0 :Text;                   # stable per session; matches MotionObject.name
-  type @1 :Text;                   # e.g. "vehicle", "aircraft", "boat" (enum to ratify)
-  location @2 :Text;               # e.g. track/place name
+  type @1 :ObjectType;             # coarse class; ratifiable enum
+  location @2 :Text;               # e.g. track/place name (display-only)
+  typeLabel @5 :Text;              # optional display label, e.g. "Formula 1 2024"
   drivePoints @3 :List(DrivePointDescriptor);
   channels @4 :List(ChannelDescriptor);
 }
