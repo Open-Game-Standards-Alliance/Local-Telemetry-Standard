@@ -29,6 +29,7 @@ Results so far:
 | [06-drone-mech.md](06-drone-mech.md) | FPV sim / MAVLink-style + legged mech | Covers — multi-propeller objects; optional per-leg force |
 | [07-elite-spacecraft.md](07-elite-spacecraft.md) | Elite Dangerous community memory offsets | Covers — `bodyDynamics` (accelerometer-class source); ship↔SRV primary switching; low-rate fused pose |
 | [08-star-citizen.md](08-star-citizen.md) | Star Citizen / D-BOX (official, vendor-encapsulated) | Out of reach today — game→rig protocol closed; decoded-traffic scenario maps via `bodyDynamics` + impact channels |
+| [09-whitewatervr.md](09-whitewatervr.md) | WhitewaterVR raft (game-native UDP, YawVR plugin evidence) | Covers — buoyancy corners as suspension drive points; car-shaped fakery documented |
 
 Cross-domain results: every tested vehicle class maps to the two-layer
 model using schema fields, annex channels, and channel families — no
