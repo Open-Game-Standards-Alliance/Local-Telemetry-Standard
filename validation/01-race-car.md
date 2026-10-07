@@ -37,17 +37,18 @@ representative, not exhaustive; the goal is coverage classification.
 | drs state | `aids.drs` | custom channel (annex candidate) |
 | lap / position / lap time / session | — | out of scope (race state deferred by design) |
 
-## Gaps found
+## Gaps found (all resolved in v1)
 
-| # | Field | Problem | Grade |
-|---|---|---|---|
-| G1 | per-wheel steering angle (AC `wheelAngl`) | `WheelState` has no per-tick steer angle (`steered` is static in the descriptor); wheel-visualization receivers want it | deferred-safe (additive field) |
-| G2 | suspension force / tyre vertical load (AC `susForce`/`tyreLoad`) | no per-wheel force; derivable only approximately via `stiffness × compression` (no damping term in `SuspensionSpec`) | deferred-safe (additive field) |
-| G3 | tyre pressure / temps / wear (iRacing 3-temp patches, wear %) | per-wheel scalars with no home; channels would need stringly per-wheel names (`tyre.coreTemp.fl`) — the linkage pattern LTS exists to avoid | deferred-safe (additive fields) or accept a documented per-wheel channel-naming convention |
+| # | Field | Resolution |
+|---|---|---|
+| G1 | per-wheel steering angle (AC `wheelAngl`) | `WheelExtended.steerAngle` (rad, + = left, ISO) |
+| G2 | suspension force / tyre vertical load (AC `susForce`/`tyreLoad`) | `WheelExtended.loadForce` (N, measured, incl. damping) + `SuspensionSpec.damping` so receivers can approximate when unmeasured |
+| G3 | tyre pressure / temps / wear (iRacing 3-temp patches, wear %) | `WheelExtended.tyrePressure`/`tyreTemp` (carcass/average; zone temps ride channels)/`tyreWear` (1 = new) |
 
-All three are additive (`WheelState` gains optional fields; unknown-field
-skipping keeps deployed receivers working), so none block release. G2 is the
-most motion-relevant; G3 is dashboard-relevant.
+All ride the all-or-neither `extended` union variant of `WheelState`
+(per-wheel physics pages arrive whole or not at all; Cap'n Proto structs
+allow only one unnamed union, so independent per-field optionals are not
+expressible).
 
 ## Conversion recipes (sender-side integration cost, not gaps)
 
@@ -65,8 +66,8 @@ most motion-relevant; G3 is dashboard-relevant.
 
 ## Verdict
 
-**Covers cleanly.** Engine/transmission/inputs/per-wheel dynamics all land
-in schema fields or annex channels with zero configuration for a conforming
-receiver. The three gaps are per-wheel extras, all deferred-safe. Wheel
-count is naturally variable (list) — motorcycles (2) and 6-wheel trucks
-extend trivially.
+**Covers cleanly — zero open gaps after pre-release fixes (G1–G3 resolved
+in v1).** Engine/transmission/inputs/per-wheel dynamics including extended
+wheel data all land in schema fields or annex channels with zero
+configuration for a conforming receiver. Wheel count is naturally variable
+(list) — motorcycles (2) and 6-wheel trucks extend trivially.

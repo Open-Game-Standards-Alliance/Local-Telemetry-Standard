@@ -93,6 +93,7 @@ kj::Array<capnp::word> buildDiscovery() {
         susp.initTravel().setMin(-0.05f);  // meters
         susp.getTravel().setMax(0.15f);
         susp.setStiffness(65000.0f);       // N/m
+        susp.setDamping(5000.0f);          // N·s/m (0 = unspecified)
         auto wheel = p.initWheel();
         wheel.setRadius(0.34f);
         wheel.setDriven(true);
@@ -155,6 +156,14 @@ kj::Array<capnp::word> buildMotion(double timestampSeconds) {
         w.setSlip(0.01f);              // slip ratio
         w.setCompression(0.04f);       // meters
         w.setContact(ContactMedium::ASPHALT);
+        if (i < 2) {                   // extended data, all-or-neither
+            auto ext = w.initExtended();
+            ext.setSteerAngle(0.02f);  // rad, + = left (ISO)
+            ext.setLoadForce(4200.0f); // N along suspension axis
+            ext.setTyrePressure(110000.0f); // Pa
+            ext.setTyreTemp(88.0f);    // degC carcass
+            ext.setTyreWear(0.97f);    // 1 = new
+        }
     }
 
     // Channel values: typed, keyed by discovery ids
@@ -216,7 +225,7 @@ Cap'n Proto requires 8-byte word alignment — the UDP envelope is 8 bytes, so a
 ## Wire size
 
 - `MotionFrame`, one object, pose only: ~68 bytes.
-- Four wheels + eight channels ≈ +200 bytes — comfortably under a 1400-byte UDP MTU at 60 Hz.
+- Four wheels (full extended data) + eight channels ≈ +280 bytes — comfortably under a 1400-byte UDP MTU at 60 Hz.
 - `DiscoveryFrame`: ~300–800 bytes, sent once per session — strings dominate, so declare channels generously; they cost nothing per frame.
 
 The equivalent self-describing-per-frame JSON would be several times larger on every packet.

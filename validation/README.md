@@ -21,4 +21,4 @@ Results so far:
 
 | Test | Domains | Verdict |
 |---|---|---|
-| [01-race-car.md](01-race-car.md) | AC-style + iRacing-style car | Covers cleanly; 3 gaps, all deferred-safe |
+| [01-race-car.md](01-race-car.md) | AC-style + iRacing-style car | Covers cleanly; G1–G3 found and fixed in v1 |

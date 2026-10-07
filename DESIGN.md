@@ -150,6 +150,16 @@ breaking deployed receivers (see §7).
   multicast is trivial to ship in engine plugins (see §7 and
   `implementation-udp.md`); Aeron remains an optional backend for extreme
   rates, strict ordering under load, or back-pressure across many subscribers.
+- **`WheelState` extended data is all-or-neither.** Per-wheel steer angle,
+  measured load force, and tyre pressure/temp/wear ride in one optional
+  `WheelExtended` struct behind a union variant. Two reasons: Cap'n Proto
+  structs allow only one unnamed union (independent per-field optionals
+  aren't expressible), and in practice per-wheel physics data arrives whole
+  (AC/iRacing-style physics pages) or not at all. Zeros inside `extended`
+  are real values — senders lacking some of the fields should not claim it.
+  `SuspensionSpec.damping` (N·s/m, 0 = unspecified) lets receivers
+  approximate load force when unmeasured. Conventions: steer angle positive
+  = left (ISO); tyre wear 1 = new; temp is carcass/average degC.
 - **`GenericState` carries force.** Generic drive points are multi-instance
   by design (four hover fans = four points), and per-point physical values
   cannot ride object-level channels without stringly-typed linkage. Force is
@@ -163,7 +173,7 @@ breaking deployed receivers (see §7).
 ## 6. Wire sizes
 
 - `MotionFrame`, one object, pose only: ~68 bytes.
-- + 4 wheels (`WheelState`) + 8 channels ≈ +200 bytes — still far under a
+- Four wheels (full extended data) + eight channels ≈ +280 bytes — still far under a
   1400-byte UDP MTU at 60 Hz.
 - `DiscoveryFrame`: ~300–800 bytes once per session (strings dominate);
   negligible on any LAN and trivially fragmentable.

@@ -119,6 +119,7 @@ struct SuspensionSpec {
   # Static suspension geometry per drive point.
   travel @0 :Range;                # compression travel, meters
   stiffness @1 :Float32;           # N/m for unit displacement
+  damping @2 :Float32;             # N·s/m; 0 = unspecified (force approximation then uses stiffness only)
 }
 
 struct DrivePointDescriptor {
@@ -207,6 +208,21 @@ struct WheelState {
   slip @3 :Float32;                # slip ratio, 0 = rolling
   compression @4 :Float32;         # current suspension compression, meters
   contact @5 :ContactMedium;
+  union {
+    # Per-wheel extras arrive whole in practice (AC/iRacing-style physics
+    # pages) or not at all — all-or-neither also fits Cap'n Proto's
+    # single-unnamed-union rule. Inside extended, zeros are real values.
+    core @6 :Void;                 # default: core fields only
+    extended @7 :WheelExtended;    # steer angle, load force, tyre data
+  }
+}
+
+struct WheelExtended {
+  steerAngle @0 :Float32;          # radians; positive = left (ISO convention)
+  loadForce @1 :Float32;           # N along suspension axis, measured (incl. damping)
+  tyrePressure @2 :Float32;        # Pa
+  tyreTemp @3 :Float32;            # degC, carcass/average (zone temps → channels)
+  tyreWear @4 :Float32;            # 0..1 fraction remaining (1 = new)
 }
 
 struct PropellerState {
