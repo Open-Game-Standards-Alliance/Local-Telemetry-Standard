@@ -50,7 +50,12 @@ discovery re-send.
 - `objects` — one `ObjectDescriptor` per streamed object (the `primary`
   flag marks the reference object): identity (`name`, `type` — a ratified
   `ObjectType` enum plus optional `typeLabel` for display — and `location`),
-  `DrivePointDescriptor`s, `ChannelDescriptor`s.
+  `referencePoint` (the vehicle-local point the reported pose and dynamics
+  are measured at; default vehicle origin), `points` (other named
+  vehicle-local points such as `cg`, `pilot`, `driverEye` — declared so
+  consumers can correct motion to their own pivot/head position with the
+  lever-arm terms `a + α×r + ω×(ω×r)`; the correction itself is
+  consumer-side), `DrivePointDescriptor`s, `ChannelDescriptor`s.
 
 `MotionFrame` carries the samples:
 

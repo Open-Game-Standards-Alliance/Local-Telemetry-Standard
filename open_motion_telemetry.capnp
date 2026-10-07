@@ -100,8 +100,23 @@ struct ObjectDescriptor {
   typeLabel @5 :Text;              # optional display label, e.g. "Formula 1 2024"
   primary @6 :Bool;                # reference object for motion rigs / compensation;
                                    # exactly one SHOULD be set per discovery frame
+  referencePoint @7 :NamedPoint;   # where reported pose/dynamics are measured;
+                                   # default (name "", zero) = vehicle origin
+  points @8 :List(NamedPoint);     # other named vehicle-local points (cg, pilot,
+                                   # driver eye, seats...) for consumer corrections
   drivePoints @3 :List(DrivePointDescriptor);
   channels @4 :List(ChannelDescriptor);
+}
+
+struct NamedPoint {
+  # A labeled position in vehicle-local coordinates (meters, same axes as the
+  # orientation quaternion). Reference points let consumers correct received
+  # motion to their own pivot/head position (lever-arm corrections):
+  #   a_seat = a_ref + alpha x r + omega x (omega x r),   r = seat - referencePoint
+  # LTS transports the declared reference and named points; the correction
+  # itself is consumer-side. Conventional names: "cg", "pilot", "driverEye".
+  name @0 :Text;
+  position @1 :Vector3;
 }
 
 struct ChannelDescriptor {

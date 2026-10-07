@@ -81,6 +81,14 @@ kj::Array<capnp::word> buildDiscovery() {
     car.setPrimary(true);                     # reference object for rigs
     car.setLocation("spa");
 
+    // Reference point: where reported pose/dynamics are measured.
+    // Default (unset) = vehicle origin. Senders whose data is CG-relative
+    // (most flight sims) declare it so consumers can apply lever-arm
+    // corrections to their own pivot/head position.
+    NamedPoint::Builder ref = car.initReferencePoint();
+    ref.setName("cg");
+    ref.initPosition().setZ(-1.2f);   // CG 1.2 m behind origin, vehicle-local
+
     // Drive points: four wheels with geometry and suspension
     auto points = car.initDrivePoints(4);
     const char* names[4] = {"wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr"};
